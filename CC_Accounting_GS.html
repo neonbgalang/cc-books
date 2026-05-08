@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clyde's Confections — Accounting</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+:root{
+  --bg:#fafaf8;--bg2:#f2f2ee;--bg3:#e8e8e2;--surface:#fff;
+  --border:#deded8;--border2:#c8c8c0;
+  --text:#1c1c18;--text2:#6b6b60;--text3:#9a9a8e;
+  --green:#1a7a4a;--green-bg:#edfaf3;--green-border:#b6ecd4;
+  --red:#c0392b;--red-bg:#fdf2f0;--red-border:#f5c6c0;
+  --amber:#92600a;--amber-bg:#fef8ec;--amber-border:#f5d98a;
+  --blue:#1a4fa0;--blue-bg:#eef3fd;--blue-border:#b8ccf5;
+  --purple:#5b2d8a;--purple-bg:#f5effe;--purple-border:#d4b8f5;
+  --accent:#2d6a4f;
+  --radius:6px;--radius-lg:10px;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg);line-height:1.5}
+/* NAV */
+.topbar{display:flex;align-items:center;gap:0;padding:0 16px;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;position:sticky;top:0;z-index:30;min-height:42px}
+.logo{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent);white-space:nowrap;margin-right:16px;padding-right:16px;border-right:1px solid var(--border)}
+.nb{padding:0 13px;height:42px;border:none;background:none;cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;letter-spacing:.01em}
+.nb.active,.nb:hover{color:var(--text);border-bottom-color:var(--accent)}
+/* VIEWS */
+.view{display:none;padding:16px;max-width:1200px}
+.view.active{display:block}
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px}
+.card-title{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+/* FORMS */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:3px}
+label{font-size:11px;color:var(--text2);font-weight:500}
+input[type=text],input[type=number],input[type=date],input[type=month],select,textarea{
+  font-family:var(--font);font-size:12px;padding:6px 9px;border:1px solid var(--border);
+  border-radius:var(--radius);background:var(--bg);color:var(--text);width:100%;
+  transition:border-color .12s,box-shadow .12s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,106,79,.08)}
+textarea{resize:vertical;min-height:52px}
+/* BUTTONS */
+.btn{padding:6px 13px;border-radius:var(--radius);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .12s;white-space:nowrap}
+.btn:hover{background:var(--bg2);border-color:var(--border2)}
+.btn-p{background:var(--text);color:var(--surface);border-color:var(--text)}
+.btn-p:hover{opacity:.82}
+.btn-d{color:var(--red);border-color:var(--red-border)}
+.btn-d:hover{background:var(--red-bg)}
+.btn-w{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.btn-s{padding:3px 8px;font-size:11px}
+.btn-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+/* METRICS */
+.mets{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px;margin-bottom:14px}
+.met{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px}
+.ml{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
+.mv{font-size:18px;font-weight:600;letter-spacing:-.01em}
+.gn{color:var(--green)}.rd{color:var(--red)}.am{color:var(--amber)}.bl{color:var(--blue)}
+/* TABLES */
+.tw{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+th{text-align:left;padding:7px 9px;font-weight:500;color:var(--text2);border-bottom:1px solid var(--border);font-size:11px;white-space:nowrap;letter-spacing:.02em}
+td{padding:6px 9px;border-bottom:1px solid var(--bg2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.mono{font-family:var(--mono);font-size:11px}
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.03em}
+.b-g{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.b-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.b-b{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.b-a{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.b-p{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.b-x{background:var(--bg2);color:var(--text2);border:1px solid var(--border)}
+/* ALERTS */
+.alert{border-radius:var(--radius);padding:9px 12px;margin-bottom:10px;font-size:12px;display:flex;gap:8px;align-items:flex-start}
+.a-i{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.a-w{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.a-s{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.a-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+/* SECTION HD */
+.shd{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:16px 0 7px;display:flex;align-items:center;gap:8px}
+.shd::after{content:'';flex:1;height:1px;background:var(--border)}
+/* LAYOUT */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
+/* MODAL */
+.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:20px;width:95%;max-width:500px;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+/* TOAST */
+.toast{position:fixed;bottom:16px;right:16px;padding:9px 16px;border-radius:var(--radius);font-size:12px;font-weight:500;opacity:0;transition:opacity .22s;pointer-events:none;z-index:999;background:var(--text);color:var(--surface);max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.show{opacity:1}
+/* PROGRESS */
+.prog{height:4px;background:var(--bg3);border-radius:2px;margin-top:4px;overflow:hidden}
+.prog-f{height:100%;border-radius:2px;transition:width .3s}
+/* FS */
+.fs-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--bg2)}
+.fs-row:last-child{border-bottom:none}
+.fs-row.total{font-weight:600;padding-top:8px;border-top:2px solid var(--border2);border-bottom:none;font-size:13px}
+.fs-row.subtotal{font-weight:600;border-top:1px solid var(--border2)}
+.fs-indent{padding-left:16px;color:var(--text2)}
+.fs-section{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 5px}
+/* AR/AP */
+.party-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px;background:var(--surface)}
+.party-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.party-bal{font-size:20px;font-weight:700;font-family:var(--mono)}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+/* ── LOGIN SCREEN ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg,#f7f7f4)}
+.login-box{background:var(--surface,#fff);border:1px solid var(--border,#e2e2dc);border-radius:var(--rl,10px);padding:38px 34px;width:100%;max-width:370px;box-shadow:0 8px 40px rgba(0,0,0,.09)}
+.login-logo{font-family:var(--mono,'DM Mono',monospace);font-size:11px;font-weight:500;color:var(--accent,#2d6a4f);letter-spacing:.08em;margin-bottom:6px}
+.login-title{font-size:23px;font-weight:600;margin-bottom:4px;letter-spacing:-.02em;color:var(--text,#1c1c18)}
+.login-sub{font-size:12px;color:var(--text2,#6b6b60);margin-bottom:28px}
+.login-err{background:var(--red-bg,#fdf2f0);color:var(--red,#c0392b);border:1px solid var(--red-bd,#f5c6c0);border-radius:var(--r,6px);padding:8px 12px;font-size:12px;margin-bottom:14px;display:none}
+.lfield{margin-bottom:14px}
+.llabel{font-size:11px;font-weight:500;color:var(--text2,#6b6b60);display:block;margin-bottom:4px;letter-spacing:.02em}
+.linput{width:100%;padding:9px 11px;border:1px solid var(--border,#e2e2dc);border-radius:var(--r,6px);font-family:var(--font,'DM Sans',sans-serif);font-size:13px;color:var(--text,#1c1c18);background:var(--bg,#f7f7f4);outline:none;transition:border-color .12s,box-shadow .12s}
+.linput:focus{border-color:var(--accent,#2d6a4f);box-shadow:0 0 0 3px rgba(45,106,79,.1)}
+.lbtn{width:100%;padding:10px;background:var(--accent,#2d6a4f);color:#fff;border:none;border-radius:var(--r,6px);font-family:var(--font,'DM Sans',sans-serif);font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.01em;transition:background .12s}
+.lbtn:hover{background:var(--accent2,#1a4030)}
+.login-hint{margin-top:18px;padding-top:16px;border-top:1px solid var(--border,#e2e2dc);font-size:11px;color:var(--text3,#9a9a8e);text-align:center}
+/* ── USER MANAGEMENT STYLES ── */
+.perm-grid{display:grid;grid-template-columns:1fr repeat(3,65px);gap:0;border:1px solid var(--border,#e2e2dc);border-radius:var(--r,6px);overflow:hidden}
+.perm-head{font-weight:600;font-size:11px;color:var(--text2,#6b6b60);padding:6px 9px;border-bottom:1px solid var(--border,#e2e2dc);text-align:center;background:var(--bg,#f7f7f4)}
+.perm-head:first-child{text-align:left}
+.perm-cell{padding:5px 9px;border-bottom:1px solid var(--bg2,#f2f2ee);display:flex;align-items:center;justify-content:center}
+.perm-cell:first-child{justify-content:flex-start;font-weight:500;font-size:12px}
+/* ── USERBAR ── */
+.userbar{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;padding-left:12px;border-left:1px solid var(--border,#e2e2dc)}
+.user-chip{font-size:11px;color:var(--text2,#6b6b60);white-space:nowrap}
+.user-role-badge{display:inline-block;padding:1px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--blue-bg,#eef3fd);color:var(--blue,#1a4fa0);border:1px solid var(--blue-bd,#b8ccf5)}
+.btn-logout{padding:4px 10px;border:1px solid var(--border,#e2e2dc);border-radius:var(--r,6px);font-size:11px;font-weight:500;cursor:pointer;background:var(--surface,#fff);color:var(--text2,#6b6b60);font-family:var(--font,'DM Sans',sans-serif)}
+.btn-logout:hover{background:var(--bg,#f7f7f4)}
+.audit-entry{padding:10px 12px;border-bottom:1px solid var(--border,#e2e2dc)}
+.audit-entry:last-child{border-bottom:none}
+.audit-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:3px}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="login-screen" class="login-wrap" style="display:none">
+  <div class="login-box">
+    <div class="login-logo">CC / BOOKS</div>
+    <div class="login-title">Clyde's Confections</div>
+    <div class="login-sub">Sign in to your accounting system</div>
+    <div class="login-err" id="login-err">Incorrect username or password.</div>
+    <div class="lfield">
+      <label class="llabel">Username</label>
+      <input class="linput" type="text" id="l-user" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="lfield">
+      <label class="llabel">Password</label>
+      <input class="linput" type="password" id="l-pass" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="lbtn" onclick="doLogin()">Sign in</button>
+    <div class="login-hint">Default: <strong>admin</strong> / <strong>admin123</strong></div>
+  </div>
+</div>
+
+<!-- ── APP SHELL (hidden until login) ── -->
+<!-- SETUP SCREEN — shown when no API URL configured -->
+<div id="setup-screen" style="display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;background:var(--bg,#f7f7f4)">
+  <div style="background:#fff;border:1px solid #e2e2dc;border-radius:10px;padding:38px 34px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,.09)">
+    <div style="font-family:monospace;font-size:11px;font-weight:500;color:#2d6a4f;margin-bottom:6px">CC / BOOKS</div>
+    <div style="font-size:22px;font-weight:600;margin-bottom:4px">Connect to Google Sheets</div>
+    <div style="font-size:12px;color:#6b6b60;margin-bottom:24px">One-time setup. Follow the steps below to get your API URL.</div>
+
+    <div style="background:#f7f7f4;border-radius:8px;padding:16px;margin-bottom:20px;font-size:12px;line-height:1.8;color:#1c1c18">
+      <div style="font-weight:600;margin-bottom:8px;font-size:13px">Setup instructions</div>
+      <div><strong>1.</strong> Go to <a href="https://script.google.com" target="_blank" style="color:#2d6a4f">script.google.com</a> and click <strong>New project</strong></div>
+      <div><strong>2.</strong> Delete the default code, paste in the <strong>Code.gs</strong> file contents</div>
+      <div><strong>3.</strong> Click <strong>Deploy &rarr; New deployment</strong></div>
+      <div><strong>4.</strong> Select type: <strong>Web app</strong></div>
+      <div><strong>5.</strong> Set <em>Execute as</em>: <strong>Me</strong></div>
+      <div><strong>6.</strong> Set <em>Who has access</em>: <strong>Anyone</strong></div>
+      <div><strong>7.</strong> Click <strong>Deploy</strong> and copy the Web app URL</div>
+      <div><strong>8.</strong> Paste it below and click Connect</div>
+    </div>
+
+    <div id="setup-err" style="background:#fdf2f0;color:#c0392b;border:1px solid #f5c6c0;border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px;display:none"></div>
+    <div id="setup-ok" style="background:#edfaf3;color:#1a7a4a;border:1px solid #b6ecd4;border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:12px;display:none"></div>
+
+    <label style="font-size:11px;font-weight:500;color:#6b6b60;display:block;margin-bottom:4px">Web App URL</label>
+    <input id="setup-url" type="text" placeholder="https://script.google.com/macros/s/.../exec"
+      style="width:100%;padding:9px 11px;border:1px solid #e2e2dc;border-radius:6px;font-size:13px;margin-bottom:12px;box-sizing:border-box;outline:none">
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="testAndSaveAPI()" style="flex:1;padding:10px;background:#2d6a4f;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Test &amp; Connect</button>
+      <button onclick="skipSetup()" style="padding:10px 14px;background:#fff;border:1px solid #e2e2dc;border-radius:6px;font-size:12px;cursor:pointer;color:#6b6b60">Skip (use local only)</button>
+    </div>
+
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid #e2e2dc;font-size:11px;color:#9a9a8e;text-align:center">
+      Already set up? <button onclick="goToLogin()" style="background:none;border:none;color:#2d6a4f;font-size:11px;cursor:pointer;font-weight:500">Go to login</button>
+    </div>
+  </div>
+</div>
+
+<div id="app-shell" style="display:none">
+
+<div id="toast" class="toast"></div>
+<div id="modal" class="modal-bg">
+  <div class="modal">
+    <div style="font-size:15px;font-weight:600;margin-bottom:3px" id="m-t"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px" id="m-s"></div>
+    <div id="m-b"></div>
+    <div class="btn-row" style="margin-top:14px" id="m-btns"></div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="logo">CC / BOOKS</div>
+  <button class="nb active" onclick="show('dash')">Dashboard</button>
+  <button class="nb" onclick="show('sv')">Sales</button>
+  <button class="nb" onclick="show('pv')">Purchases</button>
+  <button class="nb" onclick="show('suv')">Supplies</button>
+  <button class="nb" onclick="show('cv')">Cash</button>
+  <button class="nb" onclick="show('arv')">AR</button>
+  <button class="nb" onclick="show('apv')">AP</button>
+  <button class="nb" onclick="show('rmv')">Raw Materials</button>
+  <button class="nb" onclick="show('prv')">Produce</button>
+  <button class="nb" onclick="show('fgv')">Finished Goods</button>
+  <button class="nb" onclick="show('fav')">Fixed Assets</button>
+  <button class="nb" onclick="show('dv')">Depreciation</button>
+  <button class="nb" onclick="show('jv')">Journal</button>
+  <button class="nb" onclick="show('isv')">Income Stmt</button>
+  <button class="nb" onclick="show('bsv')">Balance Sheet</button>
+  <button class="nb" onclick="show('rv')">Recipes</button>
+  <button class="nb" onclick="show('coav')">Chart of Accounts</button>
+  <button class="nb" onclick="show('tbv')">Trial Balance</button>
+  <button class="nb" id="tab-users" onclick="show('usersv')">Users</button>
+  <button class="nb" id="tab-audit" onclick="show('auditv')">Audit</button>
+  <button class="nb" onclick="show('settingsv')" id="tab-settings">Settings</button>
+  <button class="nb" onclick="show('soev')">Owner's Equity</button>
+  <button class="nb" onclick="show('cfv')">Cash Flow</button>
+  <div style="margin-left:auto;padding-left:12px;border-left:1px solid var(--border2,#c8c8c0);display:flex;align-items:center;gap:6px;flex-shrink:0">
+    <button onclick="showExportModal()" style="padding:5px 12px;border:1px solid var(--border,#deded8);border-radius:6px;background:var(--surface,#fff);font-family:var(--font,sans-serif);font-size:12px;font-weight:500;cursor:pointer;color:var(--text,#1c1c18);white-space:nowrap;display:flex;align-items:center;gap:5px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+    <div class="userbar">
+      <span class="user-chip" id="ub-name"></span>
+      <span class="user-role-badge" id="ub-role"></span>
+      <button class="btn-logout" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash" class="view active">
+  <div id="dash-low"></div>
+  <div class="mets" id="dash-m"></div>
+  <div class="g2">
+    <div><div class="shd">Recent sales</div>
+      <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th>Customer</th><th style="width:50px">Cat</th><th style="width:70px;text-align:right">Amount</th></tr></thead><tbody id="d-s"></tbody></table></div>
+    </div>
+    <div><div class="shd">Recent journal entries</div>
+      <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:130px">Account</th><th style="width:50px">Type</th><th style="width:75px;text-align:right">Amount</th><th style="width:75px">Source</th></tr></thead><tbody id="d-j"></tbody></table></div>
+    </div>
+  </div>
+  <div class="g2" style="margin-top:10px">
+    <div><div class="shd">AR outstanding</div><div id="d-ar"></div></div>
+    <div><div class="shd">AP outstanding</div><div id="d-ap"></div></div>
+  </div>
+</div>
+
+<!-- SALES -->
+<div id="sv" class="view">
+  <div class="card">
+    <div class="card-title">New sale</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="s-d"></div>
+      <div class="fg"><label>Sales point</label><select id="s-sp"><option>Aura</option><option>Neon</option><option>Cathy</option><option>Kelsie</option><option>Internal</option><option>N/A</option></select></div>
+      <div class="fg"><label>Customer</label><input type="text" id="s-cu" placeholder="Name"></div>
+      <div class="fg"><label>Category</label><select id="s-ca"><option>Floats</option><option>Drinks</option><option>Puto</option><option>Kakanin</option></select></div>
+      <div class="fg"><label>Product code</label><input type="text" id="s-pr" placeholder="e.g. FGMF450-7"></div>
+      <div class="fg"><label>Qty</label><input type="number" id="s-q" min="1" value="1" oninput="calcS()"></div>
+      <div class="fg"><label>Unit cost (₱)</label><input type="number" id="s-uc" step="0.01" placeholder="0.00" oninput="calcS()"></div>
+      <div class="fg"><label>Unit price (₱)</label><input type="number" id="s-up" step="0.01" placeholder="0.00" oninput="calcS()"></div>
+      <div class="fg"><label>Commission (%)</label><input type="number" id="s-cr" step="0.1" value="0" oninput="calcS()"></div>
+      <div class="fg"><label>MOP</label><select id="s-m"><option>Cash</option><option>Online</option><option>AR - Galang Family</option><option>AR - TLB</option><option>AP - Neon</option><option>AP - Aura</option><option>AP - Cathy</option></select></div>
+      <div class="fg"><label>Notes</label><input type="text" id="s-n" placeholder="Optional"></div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:8px 10px;margin-bottom:9px;display:flex;gap:18px;flex-wrap:wrap;font-size:12px">
+      <span style="color:var(--text2)">Cost <strong id="s-tc">₱0.00</strong></span>
+      <span style="color:var(--text2)">Sales <strong id="s-ts">₱0.00</strong></span>
+      <span style="color:var(--text2)">Profit <strong id="s-pf">₱0.00</strong></span>
+      <span style="color:var(--text2)">Commission <strong id="s-cm">₱0.00</strong></span>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveS()">+ Record sale</button><button class="btn" onclick="clrS()">Clear</button></div>
+  </div>
+  <div class="shd">Sales ledger</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <input type="text" id="s-sq" placeholder="Search…" style="width:160px" oninput="renderS()">
+    <select id="s-fsp" onchange="renderS()" style="width:100px"><option value="">All SPs</option><option>Aura</option><option>Neon</option><option>Cathy</option><option>Kelsie</option><option>Internal</option></select>
+    <span id="s-cnt" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:46px">SP</th><th style="width:80px">Customer</th><th style="width:46px">Cat</th><th style="width:75px">Product</th><th style="width:32px;text-align:right">Qty</th><th style="width:68px;text-align:right">Sales</th><th style="width:62px;text-align:right">Profit</th><th style="width:52px;text-align:right">Comm</th><th style="width:55px">MOP</th><th style="width:40px">Del</th></tr></thead><tbody id="s-tb"></tbody></table></div>
+  <div class="mets" style="margin-top:9px" id="s-tot"></div>
+</div>
+
+<!-- PURCHASES -->
+<div id="pv" class="view">
+  <div class="alert a-i">Purchases linked to an ingredient auto-create FIFO lots and post journal entries.</div>
+  <div class="card">
+    <div class="card-title">New purchase</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date ordered</label><input type="date" id="p-od"></div>
+      <div class="fg"><label>Date received</label><input type="date" id="p-rd"></div>
+      <div class="fg"><label>Store</label><select id="p-st"><option>Grocery</option><option>Market / Palengke</option><option>Shopee</option><option>Mall</option><option>Other</option></select></div>
+      <div class="fg"><label>Vendor</label><input type="text" id="p-ve" placeholder="Vendor"></div>
+      <div class="fg"><label>Invoice #</label><input type="text" id="p-in" placeholder="Optional"></div>
+      <div class="fg"><label>Ingredient (links to RM)</label><select id="p-ig" onchange="fillPU()"><option value="">— select or skip —</option></select></div>
+      <div class="fg"><label>Item description</label><input type="text" id="p-it" placeholder="Full item name"></div>
+      <div class="fg"><label>Unit</label><input type="text" id="p-un" placeholder="EA"></div>
+      <div class="fg"><label>Qty</label><input type="number" id="p-q" step="0.01" min="0.01" value="1" oninput="calcP()"></div>
+      <div class="fg"><label>Unit price (₱)</label><input type="number" id="p-up" step="0.01" placeholder="0.00" oninput="calcP()"></div>
+      <div class="fg"><label>Account</label><select id="p-ac"><option>Raw Materials - Perishables</option><option>Raw Materials - Non Perishables</option><option>Tools</option><option>Equipment</option></select></div>
+      <div class="fg"><label>MOP</label><select id="p-mp"><option>Cash</option><option>CIB</option><option>Credit - Shopee</option><option>Credit - Other</option></select></div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:8px 10px;margin-bottom:9px;font-size:12px;display:flex;gap:16px;flex-wrap:wrap">
+      <span style="color:var(--text2)">Total <strong id="p-tot">₱0.00</strong></span>
+      <span id="p-fn" style="font-size:11px;color:var(--text3)"></span>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveP()">+ Record purchase</button><button class="btn" onclick="clrP()">Clear</button></div>
+  </div>
+  <div class="shd">Purchase ledger</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <input type="text" id="p-sq" placeholder="Search…" style="width:170px" oninput="renderP()">
+    <span id="p-cnt" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Rcvd</th><th style="width:90px">Vendor</th><th>Item</th><th style="width:36px">U/M</th><th style="width:36px;text-align:right">Qty</th><th style="width:65px;text-align:right">Unit ₱</th><th style="width:70px;text-align:right">Total</th><th style="width:78px">Account</th><th style="width:55px">MOP</th><th style="width:40px">Del</th></tr></thead><tbody id="p-tb"></tbody></table></div>
+  <div class="mets" style="margin-top:9px" id="p-tot2"></div>
+</div>
+
+<!-- SUPPLIES -->
+<div id="suv" class="view">
+  <div class="card">
+    <div class="card-title">Record supply purchase</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date ordered</label><input type="date" id="su-od"></div>
+      <div class="fg"><label>Date received</label><input type="date" id="su-rd"></div>
+      <div class="fg"><label>Store</label><select id="su-st"><option>Grocery</option><option>Market / Palengke</option><option>Shopee</option><option>Mall</option><option>Other</option></select></div>
+      <div class="fg"><label>Vendor</label><input type="text" id="su-ve" placeholder="Vendor"></div>
+      <div class="fg"><label>Invoice #</label><input type="text" id="su-in" placeholder="Optional"></div>
+      <div class="fg"><label>Item</label><input type="text" id="su-it" placeholder="e.g. Tape, Piping Bags"></div>
+      <div class="fg"><label>Unit</label><input type="text" id="su-un" placeholder="EA"></div>
+      <div class="fg"><label>Qty</label><input type="number" id="su-q" step="0.01" min="0.01" value="1" oninput="calcSU()"></div>
+      <div class="fg"><label>Unit price (₱)</label><input type="number" id="su-up" step="0.01" placeholder="0.00" oninput="calcSU()"></div>
+      <div class="fg"><label>MOP</label><select id="su-mp"><option>Cash</option><option>CIB</option><option>Credit - Shopee</option></select></div>
+      <div class="fg"><label>Notes</label><input type="text" id="su-no" placeholder="Optional"></div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:8px 10px;margin-bottom:9px;font-size:12px">
+      <span style="color:var(--text2)">Total <strong id="su-tot">₱0.00</strong></span>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveSU()">+ Record supply</button><button class="btn" onclick="clrSU()">Clear</button></div>
+  </div>
+  <div class="shd">Supplies ledger</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <input type="text" id="su-sq" placeholder="Search…" style="width:180px" oninput="renderSU()">
+    <span id="su-cnt" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Rcvd</th><th style="width:90px">Vendor</th><th>Item</th><th style="width:36px">U/M</th><th style="width:36px;text-align:right">Qty</th><th style="width:65px;text-align:right">Unit ₱</th><th style="width:70px;text-align:right">Total</th><th style="width:55px">MOP</th><th style="width:40px">Del</th></tr></thead><tbody id="su-tb"></tbody></table></div>
+  <div class="mets" style="margin-top:9px" id="su-tot2"></div>
+</div>
+
+<!-- CASH -->
+<div id="cv" class="view">
+  <div class="card">
+    <div class="card-title">New cash transaction</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="c-d"></div>
+      <div class="fg"><label>Account</label><select id="c-ac"><option>Cash on Hand</option><option>Cash in Bank</option></select></div>
+      <div class="fg"><label>Type</label><select id="c-ty"><option>Cash Sales</option><option>Online Sales</option><option>AR Collection</option><option>Purchase</option><option>Transfer to Bank</option><option>Transfer to Cash</option><option>Commission paid</option><option>Salary</option><option>Delivery expense</option><option>Marketing expense</option><option>Transportation</option><option>Meals & Entertainment</option><option>Shopee Payment</option><option>BPI CC Payment</option><option>Other income</option><option>Other expense</option></select></div>
+      <div class="fg"><label>Amount (₱)</label><input type="number" id="c-am" step="0.01" placeholder="0.00"></div>
+      <div class="fg"><label>Direction</label><select id="c-di"><option value="in">In (+)</option><option value="out">Out (−)</option></select></div>
+      <div class="fg"><label>Balance after (₱)</label><input type="number" id="c-ba" step="0.01" placeholder="Running balance"></div>
+      <div class="fg"><label>Notes</label><input type="text" id="c-no" placeholder="Optional"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveC()">+ Record</button><button class="btn" onclick="clrC()">Clear</button></div>
+  </div>
+  <div class="shd">Cash log</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <select id="c-fac" onchange="renderC()" style="width:140px"><option value="">All accounts</option><option>Cash on Hand</option><option>Cash in Bank</option></select>
+    <span id="c-cnt" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:100px">Account</th><th style="width:130px">Type</th><th style="width:72px;text-align:right">Amount</th><th style="width:44px">Dir</th><th style="width:80px;text-align:right">Balance</th><th>Notes</th><th style="width:40px">Del</th></tr></thead><tbody id="c-tb"></tbody></table></div>
+</div>
+
+<!-- AR -->
+<div id="arv" class="view">
+  <div class="mets" id="ar-m"></div>
+  <div class="card">
+    <div class="card-title">Record AR transaction</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="ar-d"></div>
+      <div class="fg"><label>Customer / Party</label><select id="ar-party">
+        <option>Galang Family</option><option>TLB</option><option>Esmi</option><option>Other</option>
+      </select></div>
+      <div class="fg"><label>Type</label><select id="ar-ty">
+        <option value="invoice">Invoice (sale on credit)</option>
+        <option value="collection">Collection (payment received)</option>
+        <option value="adjustment">Adjustment</option>
+      </select></div>
+      <div class="fg"><label>Amount (₱)</label><input type="number" id="ar-am" step="0.01" placeholder="0.00"></div>
+      <div class="fg"><label>Reference / Invoice #</label><input type="text" id="ar-ref" placeholder="Optional"></div>
+      <div class="fg"><label>Notes</label><input type="text" id="ar-no" placeholder="Optional"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveAR()">+ Record</button><button class="btn" onclick="clrAR()">Clear</button></div>
+  </div>
+  <div class="shd">AR ledger</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <select id="ar-fp" onchange="renderAR()" style="width:150px"><option value="">All customers</option><option>Galang Family</option><option>TLB</option><option>Esmi</option></select>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:110px">Customer</th><th style="width:90px">Type</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px;text-align:right">Running bal.</th><th>Notes</th><th style="width:40px">Del</th></tr></thead><tbody id="ar-tb"></tbody></table></div>
+</div>
+
+<!-- AP -->
+<div id="apv" class="view">
+  <div class="mets" id="ap-m"></div>
+  <div class="card">
+    <div class="card-title">Record AP transaction</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="ap-d"></div>
+      <div class="fg"><label>Payee / Party</label><select id="ap-party">
+        <option>Aura Commission</option><option>Neon Commission</option><option>Cathy Commission</option>
+        <option>Esmi Advance</option><option>Charen Advance</option><option>Shopee</option><option>Other</option>
+      </select></div>
+      <div class="fg"><label>Type</label><select id="ap-ty">
+        <option value="payable">Payable (amount owed)</option>
+        <option value="payment">Payment (amount paid)</option>
+        <option value="adjustment">Adjustment</option>
+      </select></div>
+      <div class="fg"><label>Amount (₱)</label><input type="number" id="ap-am" step="0.01" placeholder="0.00"></div>
+      <div class="fg"><label>Reference</label><input type="text" id="ap-ref" placeholder="Optional"></div>
+      <div class="fg"><label>Notes</label><input type="text" id="ap-no" placeholder="Optional"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveAP()">+ Record</button><button class="btn" onclick="clrAP()">Clear</button></div>
+  </div>
+  <div class="shd">AP ledger</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <select id="ap-fp" onchange="renderAP()" style="width:175px"><option value="">All payees</option><option>Aura Commission</option><option>Neon Commission</option><option>Cathy Commission</option><option>Esmi Advance</option><option>Charen Advance</option><option>Shopee</option></select>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:130px">Payee</th><th style="width:90px">Type</th><th style="width:80px;text-align:right">Amount</th><th style="width:80px;text-align:right">Running bal.</th><th>Notes</th><th style="width:40px">Del</th></tr></thead><tbody id="ap-tb"></tbody></table></div>
+</div>
+
+<!-- RAW MATERIALS -->
+<div id="rmv" class="view">
+  <div id="rm-low"></div>
+  <div class="mets" id="rm-m"></div>
+  <div class="card">
+    <div class="card-title">Register new ingredient</div>
+    <div class="fgrid">
+      <div class="fg"><label>Name</label><input type="text" id="ni-n" placeholder="Ingredient name"></div>
+      <div class="fg"><label>Unit</label><input type="text" id="ni-u" placeholder="EA"></div>
+      <div class="fg"><label>Low stock threshold</label><input type="number" id="ni-t" step="0.01" placeholder="e.g. 3"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveNI()">Add ingredient</button></div>
+  </div>
+  <div class="shd">Stock register (FIFO)</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <input type="text" id="rm-q" placeholder="Search…" style="width:180px" oninput="renderRM()">
+    <select id="rm-f" onchange="renderRM()" style="width:120px"><option value="">All</option><option value="low">Low / out</option></select>
+  </div>
+  <div class="tw"><table><thead><tr><th>Ingredient</th><th style="width:38px">Unit</th><th style="width:65px;text-align:right">Balance</th><th style="width:75px;text-align:right">FIFO cost</th><th style="width:80px;text-align:right">Stock value</th><th style="width:60px">Status</th><th style="width:46px">Lots</th><th style="width:40px">Del</th></tr></thead><tbody id="rm-tb"></tbody></table></div>
+</div>
+
+<!-- PRODUCE -->
+<div id="prv" class="view">
+  <div class="card">
+    <div class="card-title">Produce batch</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="pb-d"></div>
+      <div class="fg"><label>Recipe</label><select id="pb-r" onchange="prevProd()"><option value="">— select —</option></select></div>
+      <div class="fg"><label>Batches</label><input type="number" id="pb-n" min="1" value="1" oninput="prevProd()"></div>
+      <div class="fg"><label>Batch code</label><input type="text" id="pb-c" placeholder="e.g. FGMF450-7"></div>
+      <div class="fg"><label>Selling price / unit (₱)</label><input type="number" id="pb-sp" step="0.01" placeholder="0.00" oninput="prevProd()"></div>
+      <div class="fg"><label>Notes</label><input type="text" id="pb-no" placeholder="Optional"></div>
+    </div>
+    <div id="prod-prev" style="display:none">
+      <div class="shd">FIFO ingredient breakdown</div>
+      <div id="prod-ings"></div>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:8px 10px;margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
+        <span style="color:var(--text2)">Units <strong id="pv-u">—</strong></span>
+        <span style="color:var(--text2)">FIFO unit cost <strong id="pv-uc">—</strong></span>
+        <span style="color:var(--text2)">Total cost <strong id="pv-tc">—</strong></span>
+        <span style="color:var(--text2)">Potential revenue <strong id="pv-rv">—</strong></span>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:9px"><button class="btn btn-p" onclick="reqProd()">Produce batch</button><button class="btn" onclick="clrProd()">Clear</button></div>
+  </div>
+</div>
+
+<!-- FINISHED GOODS -->
+<div id="fgv" class="view">
+  <div class="mets" id="fg-m"></div>
+  <div class="shd">Finished goods log</div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:85px">Batch</th><th>Product</th><th style="width:46px">Cat</th><th style="width:43px;text-align:right">Units</th><th style="width:75px;text-align:right">FIFO cost/u</th><th style="width:63px;text-align:right">Sell ₱</th><th style="width:58px;text-align:right">Margin</th><th style="width:40px">Del</th></tr></thead><tbody id="fg-tb"></tbody></table></div>
+</div>
+
+<!-- FIXED ASSETS -->
+<div id="fav" class="view">
+  <div class="mets" id="fa-m"></div>
+  <div class="card">
+    <div class="card-title">Add fixed asset</div>
+    <div class="fgrid">
+      <div class="fg"><label>Asset name</label><input type="text" id="a-n" placeholder="e.g. Mixer 1200W"></div>
+      <div class="fg"><label>Category</label><select id="a-c"><option>Equipment</option><option>Tools</option></select></div>
+      <div class="fg"><label>Purchase date</label><input type="date" id="a-d"></div>
+      <div class="fg"><label>Cost (₱)</label><input type="number" id="a-co" step="0.01" placeholder="0.00" oninput="calcDP()"></div>
+      <div class="fg"><label>Salvage value (₱)</label><input type="number" id="a-sv" step="0.01" value="0" oninput="calcDP()"></div>
+      <div class="fg"><label>Useful life (months)</label><input type="number" id="a-li" min="1" value="36" oninput="calcDP()"></div>
+      <div class="fg"><label>Vendor</label><input type="text" id="a-ve" placeholder="Optional"></div>
+      <div class="fg"><label>Invoice #</label><input type="text" id="a-iv" placeholder="Optional"></div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:8px 10px;margin-bottom:9px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
+      <span style="color:var(--text2)">Monthly depr. <strong id="dp-mo">₱0.00</strong></span>
+      <span style="color:var(--text2)">Annual <strong id="dp-an">₱0.00</strong></span>
+      <span style="color:var(--text2)">Depreciable amt <strong id="dp-da">₱0.00</strong></span>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveFA()">+ Add asset</button><button class="btn" onclick="clrFA()">Clear</button></div>
+  </div>
+  <div class="shd">Fixed assets register</div>
+  <div id="fa-list"></div>
+</div>
+
+<!-- DEPRECIATION -->
+<div id="dv" class="view">
+  <div class="alert a-i">Straight-line method. Posts Dr Depreciation Expense / Cr Accum. Depreciation to the unified journal.</div>
+  <div class="card">
+    <div class="card-title">Run monthly depreciation</div>
+    <div class="fgrid" style="max-width:360px">
+      <div class="fg"><label>Period</label><input type="month" id="dp-per"></div>
+    </div>
+    <div id="dp-prev" style="display:none;margin-bottom:9px"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="prevDepr()">Preview</button>
+      <button class="btn btn-p" id="run-btn" onclick="runDepr()" style="display:none">Post depreciation</button>
+    </div>
+  </div>
+  <div class="shd">Depreciation history</div>
+  <div class="tw"><table><thead><tr><th style="width:75px">Period</th><th>Assets</th><th style="width:85px;text-align:right">Total</th><th style="width:70px">Status</th><th style="width:60px">Action</th></tr></thead><tbody id="dp-hist"></tbody></table></div>
+</div>
+
+<!-- JOURNAL -->
+<div id="jv" class="view">
+  <div class="card">
+    <div class="card-title">Manual journal entry</div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="j-d"></div>
+      <div class="fg"><label>Account</label><select id="j-ac">
+        <option>Cash on Hand</option><option>Cash in Bank</option><option>Accounts Receivable</option>
+        <option>Finished Goods – Floats</option><option>Finished Goods – Drinks</option><option>Finished Goods – Puto/Kakanin</option>
+        <option>Raw Materials – Perishables</option><option>Raw Materials – Non Perishables</option>
+        <option>Supplies Expense</option><option>Tools</option><option>Equipment</option>
+        <option>Accum. Depr. – Tools</option><option>Accum. Depr. – Equipment</option>
+        <option>Accounts Payable – Aura</option><option>Accounts Payable – Neon</option>
+        <option>Accounts Payable – Cathy</option><option>Shopee Payable</option>
+        <option>Capital</option><option>Retained Earnings</option>
+        <option>Sales Revenue</option><option>Cost of Goods Sold</option>
+        <option>Salary Expense</option><option>Depreciation Expense – Equipment</option>
+        <option>Depreciation Expense – Tools</option><option>Marketing Expense</option>
+        <option>Delivery Expense</option><option>Commission Expense</option>
+        <option>Transportation Expense</option><option>Meals & Entertainment</option>
+        <option>R&D Expense</option><option>Spoilage/Damage</option>
+        <option>Other Income</option><option>Other Expense</option>
+      </select></div>
+      <div class="fg"><label>Type</label><select id="j-ty"><option value="debit">Debit (Dr)</option><option value="credit">Credit (Cr)</option></select></div>
+      <div class="fg"><label>Amount (₱)</label><input type="number" id="j-am" step="0.01" placeholder="0.00"></div>
+      <div class="fg" style="grid-column:1/-1"><label>Description</label><textarea id="j-no" placeholder="Describe…"></textarea></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveJE()">Post entry</button><button class="btn" onclick="clrJE()">Clear</button></div>
+  </div>
+  <div class="shd">General ledger</div>
+  <div class="btn-row" style="margin-bottom:7px">
+    <input type="text" id="j-sq" placeholder="Search account or note…" style="width:190px" oninput="renderJ()">
+    <select id="j-ft" onchange="renderJ()" style="width:105px"><option value="">All types</option><option value="debit">Debit</option><option value="credit">Credit</option></select>
+    <select id="j-fs" onchange="renderJ()" style="width:120px"><option value="">All sources</option><option value="manual">Manual</option><option value="depreciation">Depreciation</option><option value="purchase">Purchase</option><option value="production">Production</option><option value="ar">AR</option><option value="ap">AP</option><option value="supplies">Supplies</option></select>
+    <span id="j-cnt" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+  <div class="tw"><table><thead><tr><th style="width:70px">Date</th><th style="width:52px">Period</th><th style="width:150px">Account</th><th style="width:50px">Type</th><th style="width:82px;text-align:right">Amount</th><th style="width:80px">Source</th><th>Description</th><th style="width:40px">Del</th></tr></thead><tbody id="j-tb"></tbody></table></div>
+  <div class="mets" style="margin-top:9px" id="j-tot"></div>
+</div>
+
+<!-- INCOME STATEMENT -->
+<div id="isv" class="view">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <select id="is-period" onchange="renderIS()" style="width:130px">
+      <option value="all">All periods</option>
+    </select>
+    <button class="btn" onclick="renderIS()">Refresh</button>
+    <span style="font-size:11px;color:var(--text3)">Auto-computed from journal entries</span>
+  </div>
+  <div class="mets" id="is-m"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Revenue</div>
+      <div id="is-rev"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Cost of Goods Sold</div>
+      <div id="is-cogs"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Operating expenses</div>
+    <div id="is-opex"></div>
+  </div>
+</div>
+
+<!-- BALANCE SHEET -->
+<div id="bsv" class="view">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <span style="font-size:12px;color:var(--text2)">As of today — computed from journal entries + asset register</span>
+    <button class="btn" onclick="renderBS()">Refresh</button>
+  </div>
+  <div class="mets" id="bs-m"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Assets</div>
+      <div id="bs-assets"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Liabilities &amp; Equity</div>
+      <div id="bs-le"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RECIPES -->
+<div id="rv" class="view">
+  <div class="card">
+    <div class="card-title">New recipe</div>
+    <div class="fgrid">
+      <div class="fg"><label>Recipe name</label><input type="text" id="r-n" placeholder="e.g. Mango Float 450ml ×14"></div>
+      <div class="fg"><label>Category</label><select id="r-c"><option>Floats</option><option>Drinks</option><option>Puto</option><option>Kakanin</option></select></div>
+      <div class="fg"><label>Units per batch</label><input type="number" id="r-u" min="1" value="1"></div>
+    </div>
+    <div class="shd" style="margin-top:0">Ingredients</div>
+    <div id="r-il"></div>
+    <div class="btn-row" style="margin-bottom:7px"><button class="btn btn-s" onclick="addIR()">+ Add row</button></div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveRec()">Save recipe</button><button class="btn" onclick="clrRec()">Clear</button></div>
+  </div>
+  <div class="shd">Saved recipes</div>
+  <div id="r-list"></div>
+</div>
+
+<!-- USER MANAGEMENT -->
+<div id="usersv" class="view">
+  <div class="mets" id="umgr-m"></div>
+  <div class="card">
+    <div class="card-title">Add user</div>
+    <div class="fgrid">
+      <div class="fg"><label>Username</label><input type="text" id="uu-un" placeholder="e.g. maria"></div>
+      <div class="fg"><label>Full name</label><input type="text" id="uu-fn" placeholder="Display name"></div>
+      <div class="fg"><label>Password</label><input type="password" id="uu-pw" placeholder="Min 6 chars"></div>
+      <div class="fg"><label>Role</label><select id="uu-role" onchange="showRolePrev()"></select></div>
+    </div>
+    <div id="role-prev-desc" style="font-size:11px;color:var(--text2);margin-bottom:9px;padding:7px 10px;background:var(--bg);border-radius:var(--r)">Select a role to see its description</div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveUsr()">+ Add user</button></div>
+  </div>
+  <div class="shd">Users</div>
+  <div class="tw"><table><thead><tr>
+    <th style="width:100px">Username</th><th style="width:130px">Full name</th>
+    <th style="width:110px">Role</th><th style="width:80px">Status</th>
+    <th style="width:105px">Last login</th><th style="width:55px">Logins</th>
+    <th>Actions</th>
+  </tr></thead><tbody id="usr-tb"></tbody></table></div>
+  <div class="shd">Roles &amp; permissions</div>
+  <div class="card">
+    <div class="card-title">Create / edit role</div>
+    <div class="fgrid">
+      <div class="fg"><label>Role name</label><input type="text" id="rl-name" placeholder="e.g. Bookkeeper"></div>
+      <div class="fg"><label>Description</label><input type="text" id="rl-desc" placeholder="What this role can do"></div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em">Module permissions</div>
+      <div class="perm-grid" id="perm-grid">
+        <div class="perm-head">Module</div>
+        <div class="perm-head">View</div>
+        <div class="perm-head">Create</div>
+        <div class="perm-head">Delete</div>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveRole()">Save role</button><button class="btn" onclick="clrRoleForm()">Clear</button></div>
+  </div>
+  <div class="shd">Defined roles</div>
+  <div id="roles-list"></div>
+</div>
+
+<!-- AUDIT TRAIL -->
+<div id="auditv" class="view">
+  <div class="mets" id="audit-m"></div>
+  <div class="card">
+    <div class="card-title">Filter audit trail</div>
+    <div class="fgrid">
+      <div class="fg"><label>User</label><select id="af-user"><option value="">All users</option></select></div>
+      <div class="fg"><label>Module</label><select id="af-mod"><option value="">All modules</option></select></div>
+      <div class="fg"><label>Action</label><select id="af-act"><option value="">All actions</option><option value="CREATE">Create</option><option value="EDIT">Edit</option><option value="DELETE">Delete</option><option value="LOGIN">Login</option><option value="LOGOUT">Logout</option></select></div>
+      <div class="fg"><label>Date from</label><input type="date" id="af-from"></div>
+      <div class="fg"><label>Date to</label><input type="date" id="af-to"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="renderAuditV()">Apply filters</button>
+      <button class="btn" onclick="clrAuditFilters()">Clear</button>
+      <button class="btn btn-d" onclick="cnfClearAudit()">Clear all logs</button>
+    </div>
+  </div>
+  <div class="shd">Audit log <span id="audit-cnt" style="font-size:11px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+  <div id="audit-list" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;max-height:600px;overflow-y:auto"></div>
+</div>
+
+
+<!-- SETTINGS -->
+<div id="settingsv" class="view">
+  <div class="mets" id="settings-m"></div>
+  <div class="card">
+    <div class="card-title">Google Sheets connection</div>
+    <div id="gs-status" style="margin-bottom:12px;font-size:12px"></div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>Web App URL</label>
+      <input type="text" id="gs-url-input" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:12px">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="saveAndTestAPI()">Save &amp; test connection</button>
+      <button class="btn" onclick="syncFromGS()">Force sync from Sheets</button>
+      <button class="btn btn-d" onclick="disconnectGS()">Disconnect</button>
+    </div>
+    <div id="gs-test-result" style="margin-top:10px;font-size:12px"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Data management</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Export all data to Excel, or sync data between devices.</div>
+    <div class="btn-row">
+      <button class="btn btn-p" onclick="showExportModal()">Export to Excel</button>
+      <button class="btn" onclick="clearCacheAndReload()">Refresh data cache</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Change my password</div>
+    <div class="fgrid" style="max-width:400px">
+      <div class="fg"><label>Current password</label><input type="password" id="cp-old" placeholder="Current password"></div>
+      <div class="fg"><label>New password</label><input type="password" id="cp-new" placeholder="Min 6 characters"></div>
+      <div class="fg"><label>Confirm new password</label><input type="password" id="cp-confirm" placeholder="Repeat new password"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="changeMyPw()">Change password</button></div>
+    <div id="pw-change-msg" style="margin-top:8px;font-size:12px"></div>
+  </div>
+</div>
+
+<!-- TRIAL BALANCE -->
+<div id="tbv" class="view">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <select id="tb-period" onchange="renderTB()" style="width:145px">
+      <option value="all">All periods (cumulative)</option>
+    </select>
+    <button class="btn" onclick="renderTB()">Refresh</button>
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+      <input type="checkbox" id="tb-zero" onchange="renderTB()"> Hide zero balances
+    </label>
+    <span style="font-size:11px;color:var(--text3)">Auto-computed from journal entries</span>
+  </div>
+  <div class="mets" id="tb-m"></div>
+  <div id="tb-balance-check" style="margin-bottom:10px"></div>
+  <div class="tw">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:75px">Code</th>
+          <th>Account name</th>
+          <th style="width:140px">Classification</th>
+          <th style="width:95px;text-align:right">Debit (Dr)</th>
+          <th style="width:95px;text-align:right">Credit (Cr)</th>
+          <th style="width:95px;text-align:right">Balance</th>
+          <th style="width:60px">Normal</th>
+        </tr>
+      </thead>
+      <tbody id="tb-body"></tbody>
+      <tfoot id="tb-foot" style="background:var(--bg)"></tfoot>
+    </table>
+  </div>
+  <div style="margin-top:14px;font-size:11px;color:var(--text3)">
+    Note: Trial balance is derived from posted journal entries only. Manually recorded sales, purchases, and cash transactions that were not auto-journalised will not appear here unless entered as manual journal entries.
+  </div>
+</div>
+
+
+<!-- CHART OF ACCOUNTS -->
+<div id="coav" class="view">
+  <div class="alert a-i" style="margin-bottom:14px">The Chart of Accounts is the master list of every account used in the general ledger. Add custom accounts and assign them to their classification.</div>
+  <div class="mets" id="coa-m"></div>
+  <div class="card">
+    <div class="card-title">Add account</div>
+    <div class="fgrid">
+      <div class="fg"><label>Account code</label><input type="text" id="coa-code" placeholder="e.g. 1010"></div>
+      <div class="fg"><label>Account name</label><input type="text" id="coa-name" placeholder="e.g. Cash on Hand"></div>
+      <div class="fg"><label>Classification</label>
+        <select id="coa-class">
+          <option value="asset-current">Asset — Current</option>
+          <option value="asset-noncurrent">Asset — Non-Current</option>
+          <option value="liability-current">Liability — Current</option>
+          <option value="liability-noncurrent">Liability — Non-Current</option>
+          <option value="equity">Owner's Equity</option>
+          <option value="revenue">Revenue</option>
+          <option value="cogs">Cost of Goods Sold</option>
+          <option value="expense">Operating Expense</option>
+          <option value="other-income">Other Income</option>
+          <option value="other-expense">Other Expense</option>
+        </select>
+      </div>
+      <div class="fg"><label>Normal balance</label>
+        <select id="coa-normal">
+          <option value="debit">Debit</option>
+          <option value="credit">Credit</option>
+        </select>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="coa-desc" placeholder="Optional"></div>
+      <div class="fg"><label>Status</label>
+        <select id="coa-status"><option value="active">Active</option><option value="inactive">Inactive</option></select>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn btn-p" onclick="saveCOA()">+ Add account</button><button class="btn" onclick="clrCOA()">Clear</button></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:9px;flex-wrap:wrap">
+    <input type="text" id="coa-q" placeholder="Search accounts…" style="width:190px" oninput="renderCOA()">
+    <select id="coa-fclass" onchange="renderCOA()" style="width:165px">
+      <option value="">All classifications</option>
+      <option value="asset-current">Asset — Current</option>
+      <option value="asset-noncurrent">Asset — Non-Current</option>
+      <option value="liability-current">Liability — Current</option>
+      <option value="liability-noncurrent">Liability — Non-Current</option>
+      <option value="equity">Owner's Equity</option>
+      <option value="revenue">Revenue</option>
+      <option value="cogs">COGS</option>
+      <option value="expense">Operating Expense</option>
+      <option value="other-income">Other Income</option>
+      <option value="other-expense">Other Expense</option>
+    </select>
+    <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+      <input type="checkbox" id="coa-inactive" onchange="renderCOA()"> Show inactive
+    </label>
+    <span id="coa-cnt" style="font-size:11px;color:var(--text3)"></span>
+  </div>
+  <div class="tw"><table><thead><tr>
+    <th style="width:75px">Code</th>
+    <th>Account name</th>
+    <th style="width:165px">Classification</th>
+    <th style="width:65px">Normal bal.</th>
+    <th style="width:80px;text-align:right">JE Balance</th>
+    <th style="width:55px">Status</th>
+    <th style="width:80px">Actions</th>
+  </tr></thead><tbody id="coa-tb"></tbody></table></div>
+</div>
+
+<!-- STATEMENT OF OWNER'S EQUITY -->
+<div id="soev" class="view">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <select id="soe-period" onchange="renderSOE()" style="width:130px"><option value="all">All periods</option></select>
+    <button class="btn" onclick="renderSOE()">Refresh</button>
+    <span style="font-size:11px;color:var(--text3)">Auto-computed from journal entries and sales</span>
+  </div>
+  <div class="mets" id="soe-m"></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Statement of Owner's Equity</div>
+      <div id="soe-stmt"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Equity movements</div>
+      <div id="soe-movements"></div>
+    </div>
+  </div>
+  <div class="shd">Capital & withdrawal journal entries</div>
+  <div class="tw"><table><thead><tr>
+    <th style="width:70px">Date</th>
+    <th style="width:55px">Period</th>
+    <th style="width:150px">Account</th>
+    <th style="width:55px">Type</th>
+    <th style="width:85px;text-align:right">Amount</th>
+    <th>Description</th>
+  </tr></thead><tbody id="soe-je-tb"></tbody></table></div>
+</div>
+
+<!-- CASH FLOW STATEMENT -->
+<div id="cfv" class="view">
+  <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <select id="cf-period" onchange="renderCF()" style="width:130px"><option value="all">All periods</option></select>
+    <button class="btn" onclick="renderCF()">Refresh</button>
+    <span style="font-size:11px;color:var(--text3)">Indirect method — computed from journal entries</span>
+  </div>
+  <div class="mets" id="cf-m"></div>
+  <div class="g3">
+    <div class="card">
+      <div class="card-title">Operating activities</div>
+      <div id="cf-ops"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Investing activities</div>
+      <div id="cf-inv"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Financing activities</div>
+      <div id="cf-fin"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Net cash position</div>
+    <div id="cf-summary"></div>
+  </div>
+</div>
+
+
+<script>
+// -- UTILS --
+const fmt=n=>typeof n==='number'&&!isNaN(n)?'\u20B1'+n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2}):'--';
+const fq=n=>+parseFloat(n||0).toFixed(6);
+const f2=n=>+parseFloat(n||0).toFixed(2);
+const td=()=>new Date().toISOString().split('T')[0];
+const tm=d=>d?d.slice(0,7):'';
+const mBetween=(a,b)=>{const[ay,am]=[+a.slice(0,4),+a.slice(5,7)],[by,bm]=[+b.slice(0,4),+b.slice(5,7)];return(by-ay)*12+(bm-am);};
+const addM=(ym,n)=>{let y=+ym.slice(0,4),m=+ym.slice(5,7)+n;while(m>12){m-=12;y++;}while(m<1){m+=12;y--;}return`${y}-${String(m).padStart(2,'0')}`;};
+
+// -- STORAGE --
+
+// ================================================================
+// SETUP & SETTINGS
+// ================================================================
+async function testAndSaveAPI(){
+  const url = document.getElementById('setup-url').value.trim();
+  const errEl = document.getElementById('setup-err');
+  const okEl = document.getElementById('setup-ok');
+  errEl.style.display='none'; okEl.style.display='none';
+  if(!url){ errEl.textContent='Please enter a URL'; errEl.style.display='block'; return; }
+  // Validate URL format
+  if(!url.includes('script.google.com') || !url.includes('/exec')){
+    errEl.textContent='URL looks wrong. It should contain script.google.com and end with /exec';
+    errEl.style.display='block'; return;
+  }
+  okEl.textContent='Testing connection...';
+  okEl.style.display='block';
+  try{
+    const resp = await fetch(url+'?action=ping', { method:'GET', redirect:'follow' });
+    const json = await resp.json();
+    if(json.ok){
+      localStorage.setItem(GS_API_URL_KEY, url);
+      localStorage.setItem('cc_setup_complete','1');
+      var admin = [{id:'u_admin',username:'admin',fullname:'Owner / Admin',
+        password:'admin123',role:'owner',status:'active',
+        createdAt:new Date().toISOString(),lastLogin:null,loginCount:0}];
+      localStorage.setItem('cc_auth-users', JSON.stringify(admin));
+      clearCache();
+      okEl.textContent='\u2713 Connected! Redirecting to login...';
+      okEl.style.display='block';
+      setTimeout(function(){ document.getElementById('setup-screen').style.display='none'; document.getElementById('login-screen').style.display='flex'; }, 1200);
+    } else {
+      errEl.textContent='Connection failed: '+JSON.stringify(json);
+      errEl.style.display='block';
+    }
+  }catch(e){
+    errEl.textContent='Could not reach URL: '+e.message+'. Make sure the script is deployed as "Anyone" access.';
+    errEl.style.display='block';
+  }
+}
+
+function skipSetup(){
+  var admin = [{id:'u_admin',username:'admin',fullname:'Owner / Admin',
+    password:'admin123',role:'owner',status:'active',
+    createdAt:new Date().toISOString(),lastLogin:null,loginCount:0}];
+  localStorage.setItem('cc_auth-users', JSON.stringify(admin));
+  localStorage.setItem('cc_setup_complete','1');
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+function goToLogin(){
+  localStorage.setItem('cc_setup_complete','1');
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+async function renderSettings(){
+  const url = getAPIUrl();
+  const statusEl = document.getElementById('gs-status');
+  const urlInput = document.getElementById('gs-url-input');
+  if(urlInput) urlInput.value = url || '';
+  if(url){
+    statusEl.innerHTML = '<span style="color:var(--green)">\u2713 Connected to Google Sheets</span> <span style="font-size:11px;color:var(--text3)">'+url.slice(0,60)+'...</span>';
+  } else {
+    statusEl.innerHTML = '<span style="color:var(--amber)">\u26a0 Not connected \u2014 using local storage only</span>';
+  }
+  document.getElementById('settings-m').innerHTML = `
+    <div class="met"><div class="ml">Storage mode</div><div class="mv" style="font-size:13px">${url?'Google Sheets':'Local only'}</div></div>
+    <div class="met"><div class="ml">API URL set</div><div class="mv ${url?'gn':'am'}">${url?'Yes':'No'}</div></div>`;
+}
+
+async function saveAndTestAPI(){
+  const url = document.getElementById('gs-url-input').value.trim();
+  const resEl = document.getElementById('gs-test-result');
+  if(!url){ resEl.innerHTML='<span style="color:var(--red)">Enter a URL</span>'; return; }
+  resEl.innerHTML='Testing...';
+  try{
+    const resp = await fetch(url+'?action=ping');
+    const json = await resp.json();
+    if(json.ok){
+      localStorage.setItem(GS_API_URL_KEY, url);
+      clearCache();
+      resEl.innerHTML='<span style="color:var(--green)">\u2713 Connected and saved! Data will now sync to Google Sheets.</span>';
+      toast('Google Sheets connected');
+      renderSettings();
+    } else {
+      resEl.innerHTML='<span style="color:var(--red)">Failed: '+JSON.stringify(json)+'</span>';
+    }
+  }catch(e){
+    resEl.innerHTML='<span style="color:var(--red)">Error: '+e.message+'</span>';
+  }
+}
+
+async function syncFromGS(){
+  clearCache();
+  toast('Cache cleared \u2014 data will reload from Google Sheets');
+  renderDash();
+}
+
+function clearCacheAndReload(){
+  clearCache();
+  toast('Cache cleared');
+  const activeTab = document.querySelector('.nb.active');
+  if(activeTab) activeTab.click();
+}
+
+function disconnectGS(){
+  openModal('Disconnect Google Sheets','This will remove the API URL. Data will use localStorage only. Your Google Sheet data is not deleted.','',[
+    {label:'Disconnect',cls:'btn btn-d',fn:()=>{
+      localStorage.removeItem(GS_API_URL_KEY);
+      clearCache();
+      closeModal();
+      toast('Disconnected from Google Sheets');
+      renderSettings();
+    }},{label:'Cancel',cls:'btn',fn:closeModal}
+  ]);
+}
+
+async function changeMyPw(){
+  const oldPw = document.getElementById('cp-old').value;
+  const newPw = document.getElementById('cp-new').value;
+  const confirmPw = document.getElementById('cp-confirm').value;
+  const msgEl = document.getElementById('pw-change-msg');
+  if(!oldPw||!newPw||!confirmPw){ msgEl.innerHTML='<span style="color:var(--red)">Fill all fields</span>'; return; }
+  if(newPw.length<6){ msgEl.innerHTML='<span style="color:var(--red)">New password must be at least 6 characters</span>'; return; }
+  if(newPw!==confirmPw){ msgEl.innerHTML='<span style="color:var(--red)">New passwords do not match</span>'; return; }
+  const users = await GUSERS();
+  const u = users.find(x=>x.id===SESSION?.id);
+  if(!u){ msgEl.innerHTML='<span style="color:var(--red)">User not found</span>'; return; }
+  if(u.password!==oldPw){ msgEl.innerHTML='<span style="color:var(--red)">Current password is incorrect</span>'; return; }
+  u.password = newPw;
+  await sv('auth-users', users);
+  await logAudit('EDIT','auth','Changed own password','');
+  msgEl.innerHTML='<span style="color:var(--green)">\u2713 Password changed successfully</span>';
+  document.getElementById('cp-old').value='';
+  document.getElementById('cp-new').value='';
+  document.getElementById('cp-confirm').value='';
+  toast('Password changed');
+}
+
+// ================================================================
+// STORAGE LAYER
+// Priority: 1) Google Sheets API  2) localStorage fallback
+// ================================================================
+const GS_API_URL_KEY = 'cc_gs_api_url';
+
+function getAPIUrl(){
+  return localStorage.getItem(GS_API_URL_KEY) || '';
+}
+
+async function apiFetch(params){
+  const url = getAPIUrl();
+  if(!url) return null;
+  try{
+    const resp = await fetch(url + '?' + new URLSearchParams(params), {
+      method: 'GET',
+      redirect: 'follow'
+    });
+    if(!resp.ok) return null;
+    const json = await resp.json();
+    return json.ok ? json : null;
+  }catch(e){ console.warn('apiFetch error:', e); return null; }
+}
+
+async function apiPost(body){
+  const url = getAPIUrl();
+  if(!url) return null;
+  try{
+    const resp = await fetch(url, {
+      method: 'POST',
+      redirect: 'follow',
+      body: JSON.stringify(body)
+    });
+    if(!resp.ok) return null;
+    const json = await resp.json();
+    return json.ok ? json : null;
+  }catch(e){ console.warn('apiPost error:', e); return null; }
+}
+
+// Cache layer -- avoids repeated API calls for same key in one session
+const _cache = {};
+
+async function ld(k){
+  // 1. Check memory cache
+  if(_cache[k] !== undefined) return _cache[k];
+  // 2. Try Google Sheets
+  if(getAPIUrl()){
+    try{
+      const r = await apiFetch({action:'get', key:k});
+      if(r && r.value !== null && r.value !== undefined){
+        const parsed = typeof r.value === 'string' ? JSON.parse(r.value) : r.value;
+        _cache[k] = parsed;
+        return parsed;
+      }
+      if(r && r.value === null){ _cache[k] = null; return null; }
+    }catch(e){ console.warn('GS read error', k, e); }
+  }
+  // 3. Fallback to localStorage
+  try{
+    const v = localStorage.getItem('cc_'+k);
+    const parsed = v ? JSON.parse(v) : null;
+    _cache[k] = parsed;
+    return parsed;
+  }catch(e){ return null; }
+}
+
+async function sv(k, d){
+  // Update cache immediately
+  _cache[k] = d;
+  const serialized = JSON.stringify(d);
+  // 1. Try Google Sheets
+  if(getAPIUrl()){
+    try{
+      await apiPost({action:'set', key:k, value:serialized});
+    }catch(e){ console.warn('GS write error', k, e); }
+  }
+  // 2. Always write to localStorage as backup
+  try{
+    localStorage.setItem('cc_'+k, serialized);
+  }catch(e){ console.warn('localStorage write error', k, e); }
+}
+
+function clearCache(){ Object.keys(_cache).forEach(k=>delete _cache[k]); }
+async function ld(k){
+  try{
+    if(hasClaudeStorage()){
+      const r=await window.storage.get(k);
+      return r?JSON.parse(r.value):null;
+    } else {
+      const v=localStorage.getItem('cc_'+k);
+      return v?JSON.parse(v):null;
+    }
+  }catch(e){console.warn('ld error',k,e);return null;}
+}
+async function sv(k,d){
+  try{
+    if(hasClaudeStorage()){
+      await window.storage.set(k,JSON.stringify(d));
+    } else {
+      localStorage.setItem('cc_'+k,JSON.stringify(d));
+    }
+  }catch(e){console.warn('sv error',k,e);const t=document.getElementById('toast');if(t){t.textContent='Storage error';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}}
+}
+
+function toast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.style.background=err?'var(--red)':'var(--text)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+
+// -- NAV --
+function show(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nb').forEach(b=>{if((b.getAttribute('onclick')||'').includes("'"+id+"'"))b.classList.add('active')});
+  ({
+    dash:renderDash, sv:renderS, pv:()=>{renderP();popIngSel();}, suv:renderSU,
+    cv:renderC, arv:()=>{renderAR();renderARm();}, apv:()=>{renderAP();renderAPm();},
+    rmv:()=>{renderRM();renderRMm();renderLowBanner();},
+    prv:()=>{popRecSel();document.getElementById('pb-d').value=td();},
+    fgv:renderFG, fav:()=>{renderFAm();renderFA();},
+    dv:()=>{renderDH();document.getElementById('dp-per').value=tm(td());},
+    jv:renderJ, isv:()=>{popISPeriod();renderIS();}, bsv:renderBS, rv:renderRL,
+    tbv:()=>{popTBPeriod();renderTB();}, usersv:renderUsersView, auditv:renderAuditV, settingsv:renderSettings, coav:renderCOA, soev:()=>{popSOEPeriod();renderSOE();}, cfv:()=>{popCFPeriod();renderCF();}
+  })[id]?.();
+}
+
+// -- DATA KEYS --
+const GI=async()=>(await ld('v2-ings'))||[];
+const GR=async()=>(await ld('v2-rec'))||[];
+const GS=async()=>(await ld('v2-sales'))||[];
+const GP=async()=>(await ld('v2-purch'))||[];
+const GSU=async()=>(await ld('v2-sup'))||[];
+const GC=async()=>(await ld('v2-cash'))||[];
+const GAR=async()=>(await ld('v2-ar'))||[];
+const GAP=async()=>(await ld('v2-ap'))||[];
+const GFG=async()=>(await ld('v2-fg'))||[];
+const GFA=async()=>(await ld('v2-fa'))||[];
+const GDR=async()=>(await ld('v2-dr'))||[];
+const GJ=async()=>(await ld('v2-je'))||[];
+
+// -- JOURNAL HELPERS --
+async function postJEs(entries){const j=await GJ();entries.forEach(e=>j.push(e));await sv('v2-je',j);}
+function makeJE(date,acct,type,amount,source,desc,refId){
+  return{id:'j'+Date.now()+Math.random().toString(36).slice(2,5),date,period:tm(date),acct,type,amount:f2(amount),source,desc:desc||'',refId:refId||''};
+}
+
+// -- FIFO HELPERS --
+function ingBal(ing){return fq(ing.lots.reduce((a,l)=>a+l.qty,0));}
+function ingFC(ing){const t=ingBal(ing);if(!t)return 0;return ing.lots.reduce((a,l)=>a+l.qty*l.uc,0)/t;}
+function fifoPrev(lots,needed){let r=fq(needed),c=0;for(const l of lots){if(r<=0)break;const t=Math.min(l.qty,r);c+=t*l.uc;r=fq(r-t);}return c;}
+function fifoConsume(lots,needed){let r=fq(needed),c=0;const nl=lots.map(l=>({...l}));for(let i=0;i<nl.length&&r>0;i++){const t=Math.min(nl[i].qty,r);c+=t*nl[i].uc;nl[i].qty=fq(nl[i].qty-t);r=fq(r-t);}return{newLots:nl.filter(l=>l.qty>0.0001),cost:c};}
+
+// -- DEPRECIATION HELPERS --
+function mDepr(a){return f2((a.cost-a.salvage)/a.life);}
+function accumD(a,upTo){const s=tm(a.date);if(upTo<s)return 0;const mo=Math.min(mBetween(s,upTo)+1,a.life);return f2(mDepr(a)*mo);}
+function bv(a,upTo){return f2(a.cost-accumD(a,upTo));}
+function isFullD(a,m){return bv(a,m)<=(a.salvage+0.01);}
+
+// -- SEED DATA --
+const SEED_ING=[
+  {id:'i0',name:'Angel Kremdensada 410M',unit:'EA',thresh:3,lots:[{date:'2026-03-01',qty:3,uc:55.35}]},
+  {id:'i1',name:'Angel Evaporada 410M',unit:'EA',thresh:5,lots:[{date:'2026-03-01',qty:10,uc:31.77}]},
+  {id:'i2',name:'Angel APC 370M',unit:'EA',thresh:1,lots:[{date:'2026-03-01',qty:2,uc:56.5}]},
+  {id:'i3',name:'Jersey Condensed 390g',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:4,uc:40.80}]},
+  {id:'i4',name:'Jersey Condensed Mango 390M',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:4,uc:56.70}]},
+  {id:'i5',name:'Jersey Condensed Buko Pandan 390M',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:4,uc:56.70}]},
+  {id:'i6',name:'Grahams Honey HP 210G',unit:'EA',thresh:20,lots:[{date:'2026-03-01',qty:75,uc:2.28}]},
+  {id:'i7',name:'Mangos',unit:'KG',thresh:0.5,lots:[{date:'2026-04-01',qty:1,uc:85}]},
+  {id:'i8',name:'Doking Jam - Mango',unit:'TBSP',thresh:14,lots:[{date:'2026-03-01',qty:75,uc:2.49}]},
+  {id:'i9',name:'Doking Jam - Strawberry',unit:'TBSP',thresh:14,lots:[{date:'2026-03-01',qty:30,uc:4.83}]},
+  {id:'i10',name:'ACC Syrup - Chocolate',unit:'TBSP',thresh:10,lots:[{date:'2026-03-01',qty:32,uc:3.54}]},
+  {id:'i11',name:'ACC Syrup - Strawberry',unit:'TBSP',thresh:20,lots:[{date:'2026-03-01',qty:50,uc:3.30}]},
+  {id:'i12',name:'Milktea Powder - Hazelnut Choco',unit:'G',thresh:100,lots:[{date:'2026-03-01',qty:500,uc:0.389}]},
+  {id:'i13',name:'Mr. Hat Gulaman Mango',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:9,uc:15.85}]},
+  {id:'i14',name:'Mr. Hat Gulaman Coffee Jelly',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:6,uc:15.20}]},
+  {id:'i15',name:'Mr. Hat Gulaman Buco Pandan',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:7,uc:15.20}]},
+  {id:'i16',name:'Nescafe Classic 1.9G',unit:'EA',thresh:7,lots:[{date:'2026-03-01',qty:44,uc:3.09}]},
+  {id:'i17',name:'Milo',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:11,uc:8.18}]},
+  {id:'i18',name:'Bakersfield Mango Flavorade',unit:'ML',thresh:30,lots:[{date:'2026-03-01',qty:450,uc:0.686}]},
+  {id:'i19',name:'Bakersfield BP Flavorade',unit:'ML',thresh:30,lots:[{date:'2026-03-01',qty:80,uc:0.494}]},
+  {id:'i20',name:'Bottle - 250ml Square',unit:'EA',thresh:23,lots:[{date:'2026-03-01',qty:226,uc:11.96}]},
+  {id:'i21',name:'Container - 450ml Oval',unit:'EA',thresh:14,lots:[{date:'2026-03-01',qty:128,uc:4.785}]},
+  {id:'i22',name:'Container - 300ml Oval',unit:'EA',thresh:14,lots:[{date:'2026-03-01',qty:50,uc:5.32}]},
+  {id:'i23',name:'Sticker Logo',unit:'EA',thresh:50,lots:[{date:'2026-03-01',qty:340,uc:0.975}]},
+  {id:'i24',name:'Thank you Sealing Tape',unit:'EA',thresh:14,lots:[{date:'2026-03-01',qty:44,uc:0.344}]},
+  {id:'i25',name:'Spork - Black',unit:'EA',thresh:14,lots:[{date:'2026-03-01',qty:46,uc:1.07}]},
+  {id:'i26',name:'Banana',unit:'EA',thresh:1,lots:[{date:'2026-03-01',qty:5,uc:6.67}]},
+  {id:'i27',name:'Eggs (M)',unit:'EA',thresh:6,lots:[{date:'2026-03-01',qty:12,uc:8}]},
+  {id:'i28',name:'Alaska Evap 140M',unit:'EA',thresh:3,lots:[{date:'2026-03-01',qty:8,uc:17.8}]},
+  {id:'i29',name:'Cooking Oil - Puro',unit:'Cup',thresh:2,lots:[{date:'2026-03-01',qty:9.49,uc:24.08}]},
+  {id:'i30',name:'Orion Vanilla',unit:'TBSP',thresh:5,lots:[{date:'2026-03-01',qty:242,uc:1.05}]},
+  {id:'i31',name:'Flour - 3rd Class',unit:'Cup',thresh:8,lots:[{date:'2026-03-01',qty:54,uc:4.375}]},
+  {id:'i32',name:'Flour - All Purpose',unit:'G',thresh:500,lots:[{date:'2026-03-01',qty:2772,uc:0.045}]},
+  {id:'i33',name:'Sugar - Brown',unit:'Cup',thresh:2,lots:[{date:'2026-03-01',qty:10.2,uc:12}]},
+  {id:'i34',name:'Sugar - Dark Brown',unit:'Cup',thresh:2,lots:[{date:'2026-03-01',qty:6.25,uc:13}]},
+  {id:'i35',name:'Baking Soda',unit:'G',thresh:21.6,lots:[{date:'2026-03-01',qty:273,uc:0.159}]},
+  {id:'i36',name:'Dark Chocolate Chips',unit:'Cup',thresh:1,lots:[{date:'2026-03-01',qty:5,uc:52.5}]},
+  {id:'i37',name:'Queso',unit:'EA',thresh:0.5,lots:[{date:'2026-03-01',qty:2.68,uc:42}]},
+  {id:'i38',name:'Cassava Flour',unit:'Cup',thresh:1,lots:[]},
+  {id:'i39',name:'Coconut Meat',unit:'EA',thresh:1,lots:[]},
+  {id:'i40',name:'Butter',unit:'TBSP',thresh:2,lots:[{date:'2026-03-01',qty:6,uc:3.28}]},
+  {id:'i41',name:'Hinged Sauce Cup 4oz',unit:'EA',thresh:4,lots:[{date:'2026-03-01',qty:131,uc:1.727}]},
+  {id:'i42',name:'Round Clamshell Container',unit:'EA',thresh:2,lots:[{date:'2026-03-01',qty:27,uc:8.433}]},
+  {id:'i43',name:'Clam Shell Container',unit:'EA',thresh:1,lots:[{date:'2026-03-01',qty:6,uc:10.36}]},
+  {id:'i44',name:'Paper Cupcake Liner 2oz',unit:'EA',thresh:34,lots:[{date:'2026-03-01',qty:500,uc:0.358}]}
+];
+const SEED_REC=[
+  {id:'r0',name:'Mango Float 450ml x14',cat:'Floats',units:14,ings:[{ing:'Angel Kremdensada 410M',qty:3,unit:'EA'},{ing:'Grahams Honey HP 210G',qty:21,unit:'EA'},{ing:'Mangos',qty:1,unit:'KG'},{ing:'Doking Jam - Mango',qty:14,unit:'TBSP'},{ing:'Container - 450ml Oval',qty:14,unit:'EA'},{ing:'Spork - Black',qty:14,unit:'EA'},{ing:'Sticker Logo',qty:14,unit:'EA'},{ing:'Thank you Sealing Tape',qty:14,unit:'EA'}]},
+  {id:'r1',name:'Choco Float 450ml x14',cat:'Floats',units:14,ings:[{ing:'Angel Kremdensada 410M',qty:3,unit:'EA'},{ing:'Angel APC 370M',qty:1,unit:'EA'},{ing:'Grahams Honey HP 210G',qty:42,unit:'EA'},{ing:'Milktea Powder - Hazelnut Choco',qty:100,unit:'G'},{ing:'ACC Syrup - Chocolate',qty:3.5,unit:'TBSP'},{ing:'Container - 450ml Oval',qty:14,unit:'EA'},{ing:'Spork - Black',qty:14,unit:'EA'},{ing:'Sticker Logo',qty:14,unit:'EA'}]},
+  {id:'r2',name:'Strawberry Float 450ml x14',cat:'Floats',units:14,ings:[{ing:'Angel Kremdensada 410M',qty:3,unit:'EA'},{ing:'Grahams Honey HP 210G',qty:42,unit:'EA'},{ing:'Doking Jam - Strawberry',qty:14,unit:'TBSP'},{ing:'ACC Syrup - Strawberry',qty:28,unit:'TBSP'},{ing:'Container - 300ml Oval',qty:14,unit:'EA'},{ing:'Spork - Black',qty:14,unit:'EA'},{ing:'Sticker Logo',qty:14,unit:'EA'}]},
+  {id:'r3',name:'Mango Jelly x23 bottles',cat:'Drinks',units:23,ings:[{ing:'Bakersfield Mango Flavorade',qty:30,unit:'ML'},{ing:'Jersey Condensed Mango 390M',qty:1,unit:'EA'},{ing:'Angel Evaporada 410M',qty:5,unit:'EA'},{ing:'Angel Kremdensada 410M',qty:1,unit:'EA'},{ing:'Mr. Hat Gulaman Mango',qty:2,unit:'EA'},{ing:'Bottle - 250ml Square',qty:23,unit:'EA'},{ing:'Sticker Logo',qty:23,unit:'EA'}]},
+  {id:'r4',name:'Coffee Jelly x23 bottles',cat:'Drinks',units:23,ings:[{ing:'Jersey Condensed 390g',qty:1,unit:'EA'},{ing:'Angel Evaporada 410M',qty:5,unit:'EA'},{ing:'Angel Kremdensada 410M',qty:1,unit:'EA'},{ing:'Nescafe Classic 1.9G',qty:7,unit:'EA'},{ing:'Mr. Hat Gulaman Coffee Jelly',qty:2,unit:'EA'},{ing:'Milo',qty:2,unit:'EA'},{ing:'Bottle - 250ml Square',qty:23,unit:'EA'},{ing:'Sticker Logo',qty:23,unit:'EA'}]},
+  {id:'r5',name:'Buko Pandan x23 bottles',cat:'Drinks',units:23,ings:[{ing:'Jersey Condensed Buko Pandan 390M',qty:1,unit:'EA'},{ing:'Angel Evaporada 410M',qty:5,unit:'EA'},{ing:'Angel Kremdensada 410M',qty:1,unit:'EA'},{ing:'Bakersfield BP Flavorade',qty:30,unit:'ML'},{ing:'Mr. Hat Gulaman Buco Pandan',qty:2,unit:'EA'},{ing:'Bottle - 250ml Square',qty:23,unit:'EA'},{ing:'Sticker Logo',qty:23,unit:'EA'}]},
+  {id:'r6',name:'Puto Banana x30 pcs',cat:'Puto',units:30,ings:[{ing:'Banana',qty:1,unit:'EA'},{ing:'Eggs (M)',qty:2,unit:'EA'},{ing:'Alaska Evap 140M',qty:1,unit:'EA'},{ing:'Cooking Oil - Puro',qty:0.5,unit:'Cup'},{ing:'Orion Vanilla',qty:0.5,unit:'TBSP'},{ing:'Flour - 3rd Class',qty:2,unit:'Cup'},{ing:'Sugar - Brown',qty:0.75,unit:'Cup'},{ing:'Baking Soda',qty:7.2,unit:'G'},{ing:'Dark Chocolate Chips',qty:0.25,unit:'Cup'},{ing:'Queso',qty:0.33,unit:'EA'},{ing:'Clam Shell Container',qty:1,unit:'EA'},{ing:'Paper Cupcake Liner 2oz',qty:34,unit:'EA'},{ing:'Sticker Logo',qty:1,unit:'EA'}]},
+  {id:'r7',name:'Kutsinta x1 container',cat:'Kakanin',units:1,ings:[{ing:'Cassava Flour',qty:1,unit:'Cup'},{ing:'Flour - All Purpose',qty:120,unit:'G'},{ing:'Sugar - Dark Brown',qty:0.75,unit:'Cup'},{ing:'Jersey Condensed 390g',qty:1.5,unit:'EA'},{ing:'Butter',qty:0.5,unit:'TBSP'},{ing:'Coconut Meat',qty:2,unit:'EA'},{ing:'Hinged Sauce Cup 4oz',qty:2,unit:'EA'},{ing:'Round Clamshell Container',qty:1,unit:'EA'},{ing:'Sticker Logo',qty:1,unit:'EA'}]}
+];
+const SEED_FA=[
+  {id:'fa1',name:'Mixer 1200W 5.5L - Black',cat:'Equipment',date:'2026-02-09',cost:3393,salvage:0,life:36,vendor:'Shanben',status:'active'},
+  {id:'fa2',name:'Baking Pan 10x14 set 1',cat:'Tools',date:'2026-02-11',cost:343,salvage:0,life:36,vendor:'DVX',status:'active'},
+  {id:'fa3',name:'Tape Dispenser',cat:'Tools',date:'2026-02-11',cost:179,salvage:0,life:24,vendor:'EC Packaging',status:'active'},
+  {id:'fa4',name:'137pcs Cake Decorating Set',cat:'Tools',date:'2026-02-11',cost:663,salvage:0,life:36,vendor:'LB-Cake',status:'active'},
+  {id:'fa5',name:'Stainless Measuring Cups 8pcs',cat:'Tools',date:'2026-02-11',cost:126,salvage:0,life:36,vendor:'LB-Cake',status:'active'},
+  {id:'fa6',name:'Digital Kitchen Timer',cat:'Tools',date:'2026-02-11',cost:70,salvage:0,life:24,vendor:'Vital Kitchen',status:'active'},
+  {id:'fa7',name:'Wooden Handle Cooking Tools 3pcs',cat:'Tools',date:'2026-02-11',cost:129,salvage:0,life:24,vendor:'Vital Kitchen',status:'active'},
+  {id:'fa8',name:'Stainless Mixing Bowl 3pcs',cat:'Tools',date:'2026-02-11',cost:185,salvage:0,life:36,vendor:'Vital Kitchen',status:'active'},
+  {id:'fa9',name:'Silicon Brush',cat:'Tools',date:'2026-02-11',cost:55,salvage:0,life:24,vendor:'Vital Kitchen',status:'active'},
+  {id:'fa10',name:'Non-Stick Silicon Baking Mat',cat:'Tools',date:'2026-02-11',cost:129,salvage:0,life:36,vendor:'Vital Kitchen',status:'active'},
+  {id:'fa11',name:'Stainless Cake Spatula',cat:'Tools',date:'2026-02-11',cost:45,salvage:0,life:24,vendor:'Vital Kitchen',status:'active'},
+  {id:'fa12',name:'Mini Flour Sifter Stainless',cat:'Tools',date:'2026-02-11',cost:93,salvage:0,life:24,vendor:'YF Home',status:'active'},
+  {id:'fa13',name:'Thermal Bag set 1',cat:'Tools',date:'2026-02-23',cost:285,salvage:0,life:24,vendor:'Cozy Life',status:'active'},
+  {id:'fa14',name:'Whisk',cat:'Tools',date:'2026-03-01',cost:115.75,salvage:0,life:24,vendor:'Super8',status:'active'},
+  {id:'fa15',name:'Baking Pan 10x14 set 2',cat:'Tools',date:'2026-02-25',cost:298,salvage:0,life:36,vendor:'DV Deals',status:'active'},
+  {id:'fa16',name:'Thermal Bag set 2',cat:'Tools',date:'2026-03-08',cost:290,salvage:0,life:24,vendor:'Cozy Life',status:'active'},
+  {id:'fa17',name:'600ml Ice Gel Block 2pcs',cat:'Tools',date:'2026-02-28',cost:296,salvage:0,life:24,vendor:'wrapandpack',status:'active'},
+  {id:'fa18',name:'Puto Molder Medium 100pcs',cat:'Tools',date:'2026-02-21',cost:183,salvage:0,life:36,vendor:'Prestige Picks',status:'active'},
+  {id:'fa19',name:'Puto Molder Large 50pcs',cat:'Tools',date:'2026-02-21',cost:110,salvage:0,life:36,vendor:'Prestige Picks',status:'active'},
+  {id:'fa20',name:'Puto Molder Small 100pcs',cat:'Tools',date:'2026-02-21',cost:142,salvage:0,life:36,vendor:'Prestige Picks',status:'active'},
+  {id:'fa21',name:'Funnel',cat:'Tools',date:'2026-03-10',cost:32,salvage:0,life:36,vendor:'Super8',status:'active'},
+  {id:'fa22',name:'Measuring Cup',cat:'Tools',date:'2026-03-10',cost:75,salvage:0,life:36,vendor:'Super8',status:'active'},
+  {id:'fa23',name:'Clear Squeeze Bottle',cat:'Tools',date:'2026-03-10',cost:61.75,salvage:0,life:24,vendor:'Super8',status:'active'},
+  {id:'fa24',name:'Price Labeller',cat:'Tools',date:'2026-03-15',cost:225,salvage:0,life:36,vendor:"XYM'S",status:'active'},
+  {id:'fa25',name:'Can Opener set 1',cat:'Tools',date:'2026-04-09',cost:147,salvage:0,life:36,vendor:'Aimidamida',status:'active'},
+  {id:'fa26',name:'Metal Rack Steel 5L (large)',cat:'Tools',date:'2026-04-09',cost:1269,salvage:0,life:60,vendor:'Daraga',status:'active'},
+  {id:'fa27',name:'Metal Rack Steel 5L (small)',cat:'Tools',date:'2026-04-09',cost:761,salvage:0,life:60,vendor:'Daraga',status:'active'},
+  {id:'fa28',name:'Cold Water Dispenser 2pcs',cat:'Tools',date:'2026-04-09',cost:231,salvage:0,life:36,vendor:'Magic Master',status:'active'},
+  {id:'fa29',name:'Mixing Bowl (large)',cat:'Tools',date:'2026-04-26',cost:306,salvage:0,life:36,vendor:'Happy Go',status:'active'},
+  {id:'fa30',name:'Baking Pan 10x14 set 3',cat:'Tools',date:'2026-04-30',cost:252,salvage:0,life:36,vendor:'DV Deals',status:'active'},
+  {id:'fa31',name:'Can Opener set 2',cat:'Tools',date:'2026-05-07',cost:159,salvage:0,life:36,vendor:'Mr. DIY',status:'active'}
+];
+const SEED_SUP=[
+  {id:'su1',received:'2026-04-14',ordered:'2026-04-14',store:'Grocery',vendor:'Happy Go',inv:'SI#101102/000000199992',item:'Tape',unit:'EA',qty:3,up:27.33,total:82,mop:'Cash'},
+  {id:'su2',received:'2026-04-14',ordered:'2026-04-14',store:'Grocery',vendor:'Happy Go',inv:'SI#101102/000000199992',item:'Pentel Pen',unit:'EA',qty:4,up:10,total:40,mop:'Cash'},
+  {id:'su3',received:'2026-04-14',ordered:'2026-04-14',store:'Market',vendor:'Palengke',inv:'N/A',item:'Plastic Bag',unit:'EA',qty:1,up:200,total:200,mop:'Cash'},
+  {id:'su4',received:'2026-03-14',ordered:'2026-03-12',store:'Shopee',vendor:"XYM'S",inv:'2603120CRUMVFW',item:'1 roll best before tag',unit:'EA',qty:1,up:35,total:35,mop:'Credit - Shopee'},
+  {id:'su5',received:'2026-03-14',ordered:'2026-03-14',store:'Grocery',vendor:'Super8',inv:'SI#00-243536',item:'Super8 Cling Wrap',unit:'EA',qty:1,up:60.95,total:60.95,mop:'Cash'},
+  {id:'su6',received:'2026-02-10',ordered:'2026-02-09',store:'Shopee',vendor:'Sky High Distribution',inv:'2602097TG1SQX0',item:'Disposable Pastry Piping Bag',unit:'EA',qty:100,up:1.13,total:113,mop:'Credit - Shopee'}
+];
+const SEED_AP=[
+  {id:'ap1',date:'2026-04-30',party:'Aura Commission',type:'payable',amount:80,ref:'',notes:'Pending commission balance'},
+  {id:'ap2',date:'2026-04-30',party:'Neon Commission',type:'payable',amount:1001.56,ref:'',notes:'Pending commission balance'},
+  {id:'ap3',date:'2026-04-30',party:'Esmi Advance',type:'payable',amount:25,ref:'',notes:'Advance payment'},
+  {id:'ap4',date:'2026-04-30',party:'Charen Advance',type:'payable',amount:140,ref:'',notes:'Advance payment'},
+  {id:'ap5',date:'2026-04-30',party:'Shopee',type:'payable',amount:19311,ref:'',notes:'Shopee SpayLater balance as of Apr 30'}
+];
+
+async function initData(){
+  if(!await ld('v2-ings'))await sv('v2-ings',SEED_ING);
+  if(!await ld('v2-rec'))await sv('v2-rec',SEED_REC);
+  if(!await ld('v2-fa'))await sv('v2-fa',SEED_FA);
+  if(!await ld('v2-sup'))await sv('v2-sup',SEED_SUP);
+  if(!await ld('v2-ap'))await sv('v2-ap',SEED_AP);
+}
+
+// -- DASHBOARD --
+async function renderDash(){
+  const[sales,ings,fa,jes,ar,ap]=await Promise.all([GS(),GI(),GFA(),GJ(),GAR(),GAP()]);
+  const ts=sales.reduce((a,r)=>a+r.ts,0),tp=sales.reduce((a,r)=>a+r.profit,0);
+  const rmV=ings.reduce((a,i)=>a+ingBal(i)*ingFC(i),0);
+  const now=tm(td());
+  const faBook=fa.filter(a=>a.status==='active').reduce((s,a)=>s+bv(a,now),0);
+  const totalDeprE=jes.filter(j=>j.source==='depreciation'&&j.type==='debit').reduce((a,j)=>a+j.amount,0);
+  const low=ings.filter(i=>ingBal(i)<=i.thresh&&i.thresh>0);
+  document.getElementById('dash-low').innerHTML=low.length?`<div class="alert a-w">\u26A0 <strong>${low.length} ingredient${low.length>1?'s':''} low/out:</strong> ${low.map(i=>i.name).join(', ')}</div>`:'';
+  // AR balances
+  const arBals={};ar.forEach(r=>{arBals[r.party]=(arBals[r.party]||0)+(r.type==='invoice'?r.amount:r.type==='collection'?-r.amount:r.type==='adjustment'?r.amount:0);});
+  const totalAR=Object.values(arBals).reduce((a,v)=>a+v,0);
+  // AP balances
+  const apBals={};ap.forEach(r=>{apBals[r.party]=(apBals[r.party]||0)+(r.type==='payable'?r.amount:r.type==='payment'?-r.amount:r.type==='adjustment'?r.amount:0);});
+  const totalAP=Object.values(apBals).reduce((a,v)=>a+v,0);
+  document.getElementById('dash-m').innerHTML=`
+    <div class="met"><div class="ml">Total sales</div><div class="mv gn">${fmt(ts)}</div></div>
+    <div class="met"><div class="ml">Total profit</div><div class="mv gn">${fmt(tp)}</div></div>
+    <div class="met"><div class="ml">AR outstanding</div><div class="mv bl">${fmt(totalAR)}</div></div>
+    <div class="met"><div class="ml">AP outstanding</div><div class="mv rd">${fmt(totalAP)}</div></div>
+    <div class="met"><div class="ml">RM FIFO value</div><div class="mv">${fmt(rmV)}</div></div>
+    <div class="met"><div class="ml">FA net book value</div><div class="mv">${fmt(faBook)}</div></div>
+    <div class="met"><div class="ml">Accum. depreciation</div><div class="mv rd">${fmt(totalDeprE)}</div></div>`;
+  document.getElementById('d-s').innerHTML=sales.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6).map(r=>`<tr><td>${r.date}</td><td>${r.customer}</td><td><span class="bdg b-b">${r.cat}</span></td><td style="text-align:right">${fmt(r.ts)}</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;padding:12px;color:var(--text3)">None yet</td></tr>';
+  const recentJ=jes.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  document.getElementById('d-j').innerHTML=recentJ.length?recentJ.map(j=>`<tr><td>${j.date}</td><td title="${j.acct}">${j.acct}</td><td><span class="bdg ${j.type==='debit'?'b-a':'b-b'}">${j.type==='debit'?'Dr':'Cr'}</span></td><td style="text-align:right" class="mono">${fmt(j.amount)}</td><td><span class="bdg ${j.source==='depreciation'?'b-a':j.source==='purchase'?'b-b':j.source==='production'?'b-g':j.source==='ar'?'b-p':j.source==='ap'?'b-r':'b-x'}">${j.source}</span></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:12px;color:var(--text3)">None yet</td></tr>';
+  document.getElementById('d-ar').innerHTML=Object.entries(arBals).filter(([,v])=>v>0).map(([k,v])=>`<div class="party-card"><div class="party-name">${k}</div><div class="party-bal bl">${fmt(v)}</div></div>`).join('')||'<p style="font-size:12px;color:var(--text3);padding:8px 0">No outstanding AR</p>';
+  document.getElementById('d-ap').innerHTML=Object.entries(apBals).filter(([,v])=>v>0).map(([k,v])=>`<div class="party-card"><div class="party-name">${k}</div><div class="party-bal rd">${fmt(v)}</div></div>`).join('')||'<p style="font-size:12px;color:var(--text3);padding:8px 0">No outstanding AP</p>';
+}
+
+// -- SALES --
+function calcS(){const q=+document.getElementById('s-q').value||0,uc=+document.getElementById('s-uc').value||0,up=+document.getElementById('s-up').value||0,cr=+document.getElementById('s-cr').value||0;document.getElementById('s-tc').textContent=fmt(q*uc);document.getElementById('s-ts').textContent=fmt(q*up);document.getElementById('s-pf').textContent=fmt(q*(up-uc));document.getElementById('s-cm').textContent=fmt(q*up*cr/100);}
+async function saveS(){
+  const qty=+document.getElementById('s-q').value||0,uc=+document.getElementById('s-uc').value||0,up=+document.getElementById('s-up').value||0,cr=+document.getElementById('s-cr').value||0,cu=document.getElementById('s-cu').value;
+  if(!cu||!up||!qty){toast('Fill customer, qty, price',true);return;}
+  const date=document.getElementById('s-d').value,mop=document.getElementById('s-m').value;
+  const r={id:'s'+Date.now(),date,sp:document.getElementById('s-sp').value,customer:cu,cat:document.getElementById('s-ca').value,prod:document.getElementById('s-pr').value,qty,uc,tc:qty*uc,up,ts:qty*up,profit:qty*(up-uc),commRate:cr,comm:qty*up*cr/100,mop,notes:document.getElementById('s-n').value};
+  const d=await GS();d.push(r);await sv('v2-sales',d);
+  // If AR, post AR entry
+  if(mop.startsWith('AR -')){
+    const party=mop.replace('AR - ','');
+    const ar=await GAR();ar.push({id:'ar'+Date.now(),date,party,type:'invoice',amount:qty*up,ref:r.prod||'',notes:`Sale to ${cu}`});await sv('v2-ar',ar);
+    await postJEs([makeJE(date,'Accounts Receivable','debit',qty*up,'ar',`Sale on credit to ${cu}`,r.id),makeJE(date,'Sales Revenue','credit',qty*up,'ar',`Sale to ${cu}`,r.id)]);
+  }
+  toast('Sale recorded');clrS();renderS();
+}
+function clrS(){['s-cu','s-pr','s-n'].forEach(id=>document.getElementById(id).value='');document.getElementById('s-q').value=1;document.getElementById('s-uc').value='';document.getElementById('s-up').value='';document.getElementById('s-cr').value=0;calcS();}
+async function delS(id){const d=await GS();await sv('v2-sales',d.filter(r=>r.id!==id));toast('Deleted');renderS();}
+async function renderS(){
+  const data=await GS();const q=(document.getElementById('s-sq').value||'').toLowerCase(),sp=document.getElementById('s-fsp').value;
+  const f=data.filter(r=>(!sp||r.sp===sp)&&(!q||r.customer.toLowerCase().includes(q)||(r.prod||'').toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('s-cnt').textContent=f.length+' records';
+  document.getElementById('s-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.date}</td><td>${r.sp}</td><td>${r.customer}</td><td>${r.cat}</td><td>${r.prod||'--'}</td><td style="text-align:right">${r.qty}</td><td style="text-align:right" class="mono">${fmt(r.ts)}</td><td style="text-align:right;color:${r.profit>=0?'var(--green)':'var(--red)'}" class="mono">${fmt(r.profit)}</td><td style="text-align:right" class="mono">${fmt(r.comm)}</td><td><span class="bdg ${r.mop==='Cash'?'b-g':'b-b'}">${r.mop.slice(0,6)}</span></td><td><button class="btn btn-s btn-d" onclick="delS('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="11" style="text-align:center;padding:14px;color:var(--text3)">No sales yet</td></tr>';
+  const ts=f.reduce((a,r)=>a+r.ts,0),tp=f.reduce((a,r)=>a+r.profit,0),tc=f.reduce((a,r)=>a+r.comm,0);
+  document.getElementById('s-tot').innerHTML=`<div class="met"><div class="ml">Total sales</div><div class="mv gn">${fmt(ts)}</div></div><div class="met"><div class="ml">Total profit</div><div class="mv gn">${fmt(tp)}</div></div><div class="met"><div class="ml">Commissions</div><div class="mv">${fmt(tc)}</div></div>`;
+}
+
+// -- PURCHASES --
+async function popIngSel(){const ings=await GI();const el=document.getElementById('p-ig');if(!el)return;el.innerHTML='<option value="">-- select or skip --</option>'+ings.map(i=>`<option value="${i.id}">${i.name}</option>`).join('');}
+async function fillPU(){const id=document.getElementById('p-ig').value;if(!id){document.getElementById('p-fn').textContent='';return;}const ings=await GI();const ing=ings.find(i=>i.id===id);if(ing){document.getElementById('p-un').value=ing.unit;document.getElementById('p-fn').textContent=`Current: ${fq(ingBal(ing))} ${ing.unit} @ avg ${fmt(ingFC(ing))}`; }}
+function calcP(){document.getElementById('p-tot').textContent=fmt((+document.getElementById('p-q').value||0)*(+document.getElementById('p-up').value||0));}
+async function saveP(){
+  const ingId=document.getElementById('p-ig').value,qty=+document.getElementById('p-q').value||0,up=+document.getElementById('p-up').value||0,item=document.getElementById('p-it').value.trim();
+  if(!item||!qty||!up){toast('Fill item, qty, price',true);return;}
+  const acct=document.getElementById('p-ac').value,mop=document.getElementById('p-mp').value,rcvd=document.getElementById('p-rd').value;
+  const rec={id:'p'+Date.now(),ordered:document.getElementById('p-od').value,received:rcvd,store:document.getElementById('p-st').value,vendor:document.getElementById('p-ve').value,inv:document.getElementById('p-in').value,ingId,item,unit:document.getElementById('p-un').value,qty,up,total:f2(qty*up),acct,mop};
+  const purchs=await GP();purchs.push(rec);await sv('v2-purch',purchs);
+  if(ingId){const ings=await GI();const idx=ings.findIndex(i=>i.id===ingId);if(idx>=0){ings[idx].lots.push({date:rcvd,qty,uc:up});await sv('v2-ings',ings);}}
+  const debitAcct=acct.includes('Perishables')?'Raw Materials - Perishables':acct.includes('Non Perishables')?'Raw Materials - Non Perishables':acct;
+  const creditAcct=mop==='Cash'?'Cash on Hand':mop==='CIB'?'Cash in Bank':'Shopee Payable';
+  await postJEs([makeJE(rcvd,debitAcct,'debit',qty*up,'purchase',`Purchase: ${item} from ${document.getElementById('p-ve').value||'vendor'}`,rec.id),makeJE(rcvd,creditAcct,'credit',qty*up,'purchase',`Purchase: ${item}`,rec.id)]);
+  if(mop==='Credit - Shopee'){const ap=await GAP();ap.push({id:'ap'+Date.now(),date:rcvd,party:'Shopee',type:'payable',amount:f2(qty*up),ref:document.getElementById('p-in').value,notes:`Purchase: ${item}`});await sv('v2-ap',ap);}
+  toast('Purchase recorded'+(ingId?' + FIFO lot':'')+' + journal posted');clrP();renderP();
+}
+function clrP(){['p-ig','p-it','p-un','p-ve','p-in'].forEach(id=>document.getElementById(id).value='');document.getElementById('p-q').value=1;document.getElementById('p-up').value='';document.getElementById('p-fn').textContent='';calcP();}
+async function delP(id){const d=await GP();await sv('v2-purch',d.filter(r=>r.id!==id));const j=await GJ();await sv('v2-je',j.filter(e=>e.refId!==id));toast('Deleted');renderP();}
+async function renderP(){
+  const data=await GP();const q=(document.getElementById('p-sq').value||'').toLowerCase();
+  const f=data.filter(r=>!q||(r.item||'').toLowerCase().includes(q)||(r.vendor||'').toLowerCase().includes(q)).sort((a,b)=>b.received.localeCompare(a.received));
+  document.getElementById('p-cnt').textContent=f.length+' records';
+  document.getElementById('p-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.received}</td><td title="${r.vendor}">${r.vendor||'--'}</td><td title="${r.item}">${r.item}</td><td>${r.unit}</td><td style="text-align:right">${r.qty}</td><td style="text-align:right" class="mono">${fmt(r.up)}</td><td style="text-align:right" class="mono">${fmt(r.total)}</td><td><span class="bdg b-b" style="font-size:10px">${(r.acct||'').replace('Raw Materials - ','RM ')}</span></td><td><span class="bdg ${r.mop==='Cash'?'b-g':r.mop==='CIB'?'b-a':'b-b'}">${r.mop.slice(0,6)}</span></td><td><button class="btn btn-s btn-d" onclick="delP('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="10" style="text-align:center;padding:14px;color:var(--text3)">No purchases yet</td></tr>';
+  const tot=f.reduce((a,r)=>a+r.total,0);
+  document.getElementById('p-tot2').innerHTML=`<div class="met"><div class="ml">Total</div><div class="mv rd">${fmt(tot)}</div></div><div class="met"><div class="ml">Transactions</div><div class="mv">${f.length}</div></div>`;
+}
+
+// -- SUPPLIES --
+function calcSU(){document.getElementById('su-tot').textContent=fmt((+document.getElementById('su-q').value||0)*(+document.getElementById('su-up').value||0));}
+async function saveSU(){
+  const qty=+document.getElementById('su-q').value||0,up=+document.getElementById('su-up').value||0,item=document.getElementById('su-it').value.trim();
+  if(!item||!qty||!up){toast('Fill item, qty, price',true);return;}
+  const rcvd=document.getElementById('su-rd').value,mop=document.getElementById('su-mp').value;
+  const rec={id:'su'+Date.now(),ordered:document.getElementById('su-od').value,received:rcvd,store:document.getElementById('su-st').value,vendor:document.getElementById('su-ve').value,inv:document.getElementById('su-in').value,item,unit:document.getElementById('su-un').value,qty,up,total:f2(qty*up),mop,notes:document.getElementById('su-no').value};
+  const d=await GSU();d.push(rec);await sv('v2-sup',d);
+  const creditAcct=mop==='Cash'?'Cash on Hand':mop==='CIB'?'Cash in Bank':'Shopee Payable';
+  await postJEs([makeJE(rcvd,'Supplies Expense','debit',qty*up,'supplies',`Supplies: ${item} from ${document.getElementById('su-ve').value||'vendor'}`,rec.id),makeJE(rcvd,creditAcct,'credit',qty*up,'supplies',`Supplies: ${item}`,rec.id)]);
+  toast('Supply recorded + journal posted');clrSU();renderSU();
+}
+function clrSU(){['su-ve','su-in','su-it','su-un','su-no'].forEach(id=>document.getElementById(id).value='');document.getElementById('su-q').value=1;document.getElementById('su-up').value='';calcSU();}
+async function delSU(id){const d=await GSU();await sv('v2-sup',d.filter(r=>r.id!==id));const j=await GJ();await sv('v2-je',j.filter(e=>e.refId!==id));toast('Deleted');renderSU();}
+async function renderSU(){
+  const data=await GSU();const q=(document.getElementById('su-sq').value||'').toLowerCase();
+  const f=data.filter(r=>!q||(r.item||'').toLowerCase().includes(q)||(r.vendor||'').toLowerCase().includes(q)).sort((a,b)=>b.received.localeCompare(a.received));
+  document.getElementById('su-cnt').textContent=f.length+' records';
+  document.getElementById('su-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.received}</td><td title="${r.vendor}">${r.vendor||'--'}</td><td title="${r.item}">${r.item}</td><td>${r.unit}</td><td style="text-align:right">${r.qty}</td><td style="text-align:right" class="mono">${fmt(r.up)}</td><td style="text-align:right" class="mono">${fmt(r.total)}</td><td><span class="bdg ${r.mop==='Cash'?'b-g':'b-b'}">${r.mop.slice(0,6)}</span></td><td><button class="btn btn-s btn-d" onclick="delSU('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:14px;color:var(--text3)">No supplies yet</td></tr>';
+  const tot=f.reduce((a,r)=>a+r.total,0);
+  document.getElementById('su-tot2').innerHTML=`<div class="met"><div class="ml">Total supplies</div><div class="mv rd">${fmt(tot)}</div></div><div class="met"><div class="ml">Transactions</div><div class="mv">${f.length}</div></div>`;
+}
+
+// -- CASH --
+async function saveC(){const am=+document.getElementById('c-am').value||0;if(!am){toast('Enter amount',true);return;}const r={id:'c'+Date.now(),date:document.getElementById('c-d').value,acct:document.getElementById('c-ac').value,type:document.getElementById('c-ty').value,amount:am,dir:document.getElementById('c-di').value,balance:+document.getElementById('c-ba').value||0,notes:document.getElementById('c-no').value};const d=await GC();d.push(r);await sv('v2-cash',d);toast('Recorded');clrC();renderC();}
+function clrC(){document.getElementById('c-am').value='';document.getElementById('c-ba').value='';document.getElementById('c-no').value='';}
+async function delC(id){const d=await GC();await sv('v2-cash',d.filter(r=>r.id!==id));toast('Deleted');renderC();}
+async function renderC(){
+  const data=await GC();const fac=document.getElementById('c-fac').value;
+  const f=data.filter(r=>!fac||r.acct===fac).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('c-cnt').textContent=f.length+' records';
+  document.getElementById('c-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.date}</td><td>${r.acct}</td><td>${r.type}</td><td style="text-align:right;color:${r.dir==='in'?'var(--green)':'var(--red)'}" class="mono">${r.dir==='in'?'+':'-'}${fmt(r.amount)}</td><td><span class="bdg ${r.dir==='in'?'b-g':'b-r'}">${r.dir==='in'?'In':'Out'}</span></td><td style="text-align:right" class="mono">${fmt(r.balance)}</td><td>${r.notes||'--'}</td><td><button class="btn btn-s btn-d" onclick="delC('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;padding:14px;color:var(--text3)">No transactions yet</td></tr>';
+}
+
+// -- AR --
+function clrAR(){document.getElementById('ar-am').value='';document.getElementById('ar-ref').value='';document.getElementById('ar-no').value='';}
+async function saveAR(){
+  const am=+document.getElementById('ar-am').value||0;if(!am){toast('Enter amount',true);return;}
+  const date=document.getElementById('ar-d').value,party=document.getElementById('ar-party').value,type=document.getElementById('ar-ty').value;
+  const r={id:'ar'+Date.now(),date,party,type,amount:am,ref:document.getElementById('ar-ref').value,notes:document.getElementById('ar-no').value};
+  const d=await GAR();d.push(r);await sv('v2-ar',d);
+  if(type==='invoice')await postJEs([makeJE(date,'Accounts Receivable','debit',am,'ar',`Invoice to ${party}`,r.id),makeJE(date,'Sales Revenue','credit',am,'ar',`Invoice to ${party}`,r.id)]);
+  else if(type==='collection')await postJEs([makeJE(date,'Cash in Bank','debit',am,'ar',`AR collection from ${party}`,r.id),makeJE(date,'Accounts Receivable','credit',am,'ar',`Collection from ${party}`,r.id)]);
+  toast('AR recorded');clrAR();renderAR();renderARm();
+}
+async function delAR(id){const d=await GAR();await sv('v2-ar',d.filter(r=>r.id!==id));const j=await GJ();await sv('v2-je',j.filter(e=>e.refId!==id));toast('Deleted');renderAR();renderARm();}
+async function renderARm(){
+  const ar=await GAR();const bals={};ar.forEach(r=>{bals[r.party]=(bals[r.party]||0)+(r.type==='invoice'?r.amount:r.type==='collection'?-r.amount:r.amount);});
+  const totalAR=Object.values(bals).reduce((a,v)=>a+v,0);
+  document.getElementById('ar-m').innerHTML=`<div class="met"><div class="ml">Total AR outstanding</div><div class="mv bl">${fmt(totalAR)}</div></div>`+Object.entries(bals).map(([k,v])=>`<div class="met"><div class="ml">${k}</div><div class="mv ${v>0?'bl':'gn'}">${fmt(v)}</div></div>`).join('');
+}
+async function renderAR(){
+  const data=await GAR();const fp=document.getElementById('ar-fp').value;
+  const f=data.filter(r=>!fp||r.party===fp).sort((a,b)=>b.date.localeCompare(a.date));
+  // compute running balance per party
+  const byParty={};f.slice().reverse().forEach(r=>{byParty[r.party]=(byParty[r.party]||0)+(r.type==='invoice'?r.amount:r.type==='collection'?-r.amount:r.amount);});
+  document.getElementById('ar-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.date}</td><td>${r.party}</td><td><span class="bdg ${r.type==='invoice'?'b-b':r.type==='collection'?'b-g':'b-x'}">${r.type}</span></td><td style="text-align:right" class="mono">${fmt(r.amount)}</td><td style="text-align:right" class="mono">${fmt(byParty[r.party]||0)}</td><td>${r.notes||'--'}</td><td><button class="btn btn-s btn-d" onclick="delAR('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--text3)">No AR entries yet</td></tr>';
+}
+
+// -- AP --
+function clrAP(){document.getElementById('ap-am').value='';document.getElementById('ap-ref').value='';document.getElementById('ap-no').value='';}
+async function saveAP(){
+  const am=+document.getElementById('ap-am').value||0;if(!am){toast('Enter amount',true);return;}
+  const date=document.getElementById('ap-d').value,party=document.getElementById('ap-party').value,type=document.getElementById('ap-ty').value;
+  const r={id:'ap'+Date.now(),date,party,type,amount:am,ref:document.getElementById('ap-ref').value,notes:document.getElementById('ap-no').value};
+  const d=await GAP();d.push(r);await sv('v2-ap',d);
+  const apAcct=party.includes('Shopee')?'Shopee Payable':party.includes('Aura')?'Accounts Payable - Aura':party.includes('Neon')?'Accounts Payable - Neon':'Accounts Payable - Cathy';
+  if(type==='payable')await postJEs([makeJE(date,'Commission Expense','debit',am,'ap',`AP: ${party}`,r.id),makeJE(date,apAcct,'credit',am,'ap',`AP: ${party}`,r.id)]);
+  else if(type==='payment')await postJEs([makeJE(date,apAcct,'debit',am,'ap',`AP payment to ${party}`,r.id),makeJE(date,'Cash in Bank','credit',am,'ap',`AP payment: ${party}`,r.id)]);
+  toast('AP recorded');clrAP();renderAP();renderAPm();
+}
+async function delAP(id){const d=await GAP();await sv('v2-ap',d.filter(r=>r.id!==id));const j=await GJ();await sv('v2-je',j.filter(e=>e.refId!==id));toast('Deleted');renderAP();renderAPm();}
+async function renderAPm(){
+  const ap=await GAP();const bals={};ap.forEach(r=>{bals[r.party]=(bals[r.party]||0)+(r.type==='payable'?r.amount:r.type==='payment'?-r.amount:r.amount);});
+  const totalAP=Object.values(bals).reduce((a,v)=>a+v,0);
+  document.getElementById('ap-m').innerHTML=`<div class="met"><div class="ml">Total AP outstanding</div><div class="mv rd">${fmt(totalAP)}</div></div>`+Object.entries(bals).map(([k,v])=>`<div class="met"><div class="ml">${k}</div><div class="mv ${v>0?'rd':'gn'}">${fmt(v)}</div></div>`).join('');
+}
+async function renderAP(){
+  const data=await GAP();const fp=document.getElementById('ap-fp').value;
+  const f=data.filter(r=>!fp||r.party===fp).sort((a,b)=>b.date.localeCompare(a.date));
+  const byParty={};f.slice().reverse().forEach(r=>{byParty[r.party]=(byParty[r.party]||0)+(r.type==='payable'?r.amount:r.type==='payment'?-r.amount:r.amount);});
+  document.getElementById('ap-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.date}</td><td>${r.party}</td><td><span class="bdg ${r.type==='payable'?'b-r':r.type==='payment'?'b-g':'b-x'}">${r.type}</span></td><td style="text-align:right" class="mono">${fmt(r.amount)}</td><td style="text-align:right" class="mono">${fmt(byParty[r.party]||0)}</td><td>${r.notes||'--'}</td><td><button class="btn btn-s btn-d" onclick="delAP('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--text3)">No AP entries yet</td></tr>';
+}
+
+// -- RAW MATERIALS --
+async function saveNI(){const n=document.getElementById('ni-n').value.trim(),u=document.getElementById('ni-u').value.trim()||'EA',t=+document.getElementById('ni-t').value||0;if(!n){toast('Enter name',true);return;}const ings=await GI();if(ings.find(i=>i.name===n)){toast('Already exists',true);return;}ings.push({id:'i'+Date.now(),name:n,unit:u,thresh:t,lots:[]});await sv('v2-ings',ings);toast('Added');document.getElementById('ni-n').value='';document.getElementById('ni-u').value='';document.getElementById('ni-t').value='';renderRM();renderRMm();popIngSel();}
+async function delIng(id){const d=await GI();await sv('v2-ings',d.filter(i=>i.id!==id));toast('Removed');renderRM();renderRMm();popIngSel();}
+async function renderRMm(){const ings=await GI();const tv=ings.reduce((a,i)=>a+ingBal(i)*ingFC(i),0);const low=ings.filter(i=>ingBal(i)<=i.thresh&&i.thresh>0).length,out=ings.filter(i=>ingBal(i)<=0).length;document.getElementById('rm-m').innerHTML=`<div class="met"><div class="ml">Ingredients</div><div class="mv">${ings.length}</div></div><div class="met"><div class="ml">FIFO stock value</div><div class="mv">${fmt(tv)}</div></div><div class="met"><div class="ml">Low stock</div><div class="mv am">${low}</div></div><div class="met"><div class="ml">Out of stock</div><div class="mv rd">${out}</div></div>`;}
+async function renderLowBanner(){const ings=await GI();const low=ings.filter(i=>ingBal(i)<=i.thresh&&i.thresh>0);const el=document.getElementById('rm-low');if(el)el.innerHTML=low.length?`<div class="alert a-w">\u26A0 <strong>${low.length} item${low.length>1?'s':''} low/out:</strong> ${low.map(i=>i.name+' ('+fq(ingBal(i))+' '+i.unit+')').join(', ')}</div>`:'';}
+async function showLots(ingId){const ings=await GI();const ing=ings.find(i=>i.id===ingId);if(!ing)return;openModal(`FIFO lots: ${ing.name}`,`${ing.lots.length} lot(s)`,ing.lots.length?ing.lots.map((l,i)=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bg2);font-size:13px"><span>Lot ${i+1} \u00B7 ${l.date}</span><span class="mono">${fq(l.qty)} ${ing.unit} @ ${fmt(l.uc)}</span></div>`).join(''):'<p style="color:var(--text3);font-size:13px">No lots</p>',[{label:'Close',cls:'btn',fn:closeModal}]);}
+async function renderRM(){
+  const ings=await GI();const q=(document.getElementById('rm-q').value||'').toLowerCase(),f=document.getElementById('rm-f').value;
+  const fil=ings.filter(i=>{if(q&&!i.name.toLowerCase().includes(q))return false;if(f==='low'&&ingBal(i)>i.thresh)return false;return true;});
+  document.getElementById('rm-tb').innerHTML=fil.length?fil.map(i=>{const bal=ingBal(i),fc=ingFC(i),pct=i.thresh>0?Math.min(100,bal/i.thresh*100):100;const bc=bal<=0?'var(--red)':bal<=i.thresh?'var(--amber)':'var(--green)';const st=bal<=0?'<span class="bdg b-r">Out</span>':bal<=i.thresh?'<span class="bdg b-a">Low</span>':'<span class="bdg b-g">OK</span>';return`<tr><td title="${i.name}">${i.name}</td><td>${i.unit}</td><td style="text-align:right;font-weight:600" class="mono">${fq(bal)}</td><td style="text-align:right" class="mono">${fmt(fc)}</td><td style="text-align:right" class="mono">${fmt(bal*fc)}</td><td>${st}<div class="prog"><div class="prog-f" style="width:${pct.toFixed(0)}%;background:${bc}"></div></div></td><td><button class="btn btn-s" onclick="showLots('${i.id}')">lots</button></td><td><button class="btn btn-s btn-d" onclick="delIng('${i.id}')">del</button></td></tr>`;}).join(''):'<tr><td colspan="8" style="text-align:center;padding:14px;color:var(--text3)">No ingredients</td></tr>';
+}
+
+// -- PRODUCE --
+async function popRecSel(){const recs=await GR();document.getElementById('pb-r').innerHTML='<option value="">-- select --</option>'+recs.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');}
+async function prevProd(){
+  const rid=document.getElementById('pb-r').value,n=+document.getElementById('pb-n').value||1,sp=+document.getElementById('pb-sp').value||0;
+  const prev=document.getElementById('prod-prev');if(!rid){prev.style.display='none';return;}
+  const[recs,ings]=[await GR(),await GI()];const rec=recs.find(r=>r.id===rid);if(!rec){prev.style.display='none';return;}
+  prev.style.display='block';let tc=0;
+  const rows=rec.ings.map(ri=>{const needed=fq(ri.qty*n);const ing=ings.find(i=>i.name===ri.ing);const bal=ing?ingBal(ing):null;const fc=ing?fifoPrev(ing.lots,needed):0;if(ing)tc+=fc;const ok=bal===null||bal>=needed;return`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg2);font-size:12px;gap:8px"><span style="flex:1.4">${ri.ing}</span><span style="flex:.7;text-align:right;color:var(--text2)">${needed} ${ri.unit}</span><span style="flex:.9;text-align:right;color:${ok?'var(--green)':'var(--red)'}">${bal===null?'not tracked':`have ${fq(bal)}`}</span><span style="flex:.8;text-align:right" class="mono">${fc>0?fmt(fc):''}</span></div>`;}).join('');
+  document.getElementById('prod-ings').innerHTML=rows;
+  const units=rec.units*n,uc=units?tc/units:0;
+  document.getElementById('pv-u').textContent=units;document.getElementById('pv-uc').textContent=fmt(uc);document.getElementById('pv-tc').textContent=fmt(tc);document.getElementById('pv-rv').textContent=sp?fmt(units*sp):'--';
+}
+let pendProd=null;
+async function reqProd(){
+  const rid=document.getElementById('pb-r').value,n=+document.getElementById('pb-n').value||1,code=document.getElementById('pb-c').value.trim(),sp=+document.getElementById('pb-sp').value||0;
+  if(!rid||!code){toast('Select recipe and enter batch code',true);return;}
+  const[recs,ings]=[await GR(),await GI()];const rec=recs.find(r=>r.id===rid);if(!rec)return;
+  let tc=0,hasShort=false;
+  const checks=rec.ings.map(ri=>{const needed=fq(ri.qty*n);const ing=ings.find(i=>i.name===ri.ing);const bal=ing?ingBal(ing):null;const fc=ing?fifoPrev(ing.lots,needed):0;if(ing)tc+=fc;if(ing&&bal<needed)hasShort=true;return{name:ri.ing,needed,unit:ri.unit,bal,ok:bal===null||bal>=needed,fc,tracked:bal!==null};});
+  const units=rec.units*n,uc=units?tc/units:0;
+  pendProd={rid,rec,n,code,sp,date:document.getElementById('pb-d').value,notes:document.getElementById('pb-no').value,units,tc,uc};
+  const body=checks.map(c=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg2);font-size:12px"><span>${c.name}</span><span>\u2212${c.needed} ${c.unit}</span><span style="color:${c.ok?'var(--green)':'var(--red)'}">${c.tracked?`have ${fq(c.bal)}`:'not tracked'}</span></div>`).join('')+`<div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:var(--radius);font-size:12px">Units: <strong>${units}</strong> \u00B7 FIFO cost/unit: <strong>${fmt(uc)}</strong> \u00B7 Total: <strong>${fmt(tc)}</strong></div>`+(hasShort?'<div class="alert a-w" style="margin-top:8px">\u26A0 Some ingredients are short. You can still proceed.</div>':'');
+  openModal(`Produce: ${rec.name} x${n}`,'FIFO deduction from raw materials:',body,[{label:hasShort?'Proceed anyway':'Confirm & deduct',cls:hasShort?'btn btn-w':'btn btn-p',fn:confirmProd},{label:'Cancel',cls:'btn',fn:closeModal}]);
+}
+async function confirmProd(){
+  if(!pendProd)return;const{rec,n,code,sp,date,notes,units,tc,uc}=pendProd;
+  const ings=await GI();
+  rec.ings.forEach(ri=>{const needed=fq(ri.qty*n);const idx=ings.findIndex(i=>i.name===ri.ing);if(idx>=0){const res=fifoConsume(ings[idx].lots,needed);ings[idx].lots=res.newLots;}});
+  await sv('v2-ings',ings);
+  const fg=await GFG();fg.push({id:'fg'+Date.now(),date,batch:code,desc:rec.name,cat:rec.cat,qty:units,cost:tc,uc,sp,notes});await sv('v2-fg',fg);
+  const fgAcct=rec.cat==='Floats'?'Finished Goods - Floats':rec.cat==='Drinks'?'Finished Goods - Drinks':'Finished Goods - Puto/Kakanin';
+  await postJEs([makeJE(date,fgAcct,'debit',tc,'production',`Produced: ${rec.name} x${n} (${units} units, batch ${code})`,code),makeJE(date,'Raw Materials - Perishables','credit',tc,'production',`FIFO cost deduction: ${rec.name} x${n}`,code)]);
+  closeModal();toast('Batch produced \u00B7 FIFO deducted \u00B7 journal posted');clrProd();renderRM();renderRMm();renderLowBanner();
+}
+function clrProd(){document.getElementById('pb-r').value='';document.getElementById('pb-n').value=1;document.getElementById('pb-c').value='';document.getElementById('pb-sp').value='';document.getElementById('pb-no').value='';document.getElementById('prod-prev').style.display='none';}
+
+// -- FINISHED GOODS --
+async function renderFG(){const fg=await GFG();const s=fg.sort((a,b)=>b.date.localeCompare(a.date));const tu=s.reduce((a,r)=>a+r.qty,0),tc=s.reduce((a,r)=>a+r.cost,0);document.getElementById('fg-m').innerHTML=`<div class="met"><div class="ml">Batches</div><div class="mv">${s.length}</div></div><div class="met"><div class="ml">Total units</div><div class="mv">${tu}</div></div><div class="met"><div class="ml">Total FIFO cost</div><div class="mv rd">${fmt(tc)}</div></div>`;document.getElementById('fg-tb').innerHTML=s.length?s.map(r=>`<tr><td>${r.date}</td><td>${r.batch}</td><td title="${r.desc}">${r.desc}</td><td><span class="bdg b-b">${r.cat}</span></td><td style="text-align:right">${r.qty}</td><td style="text-align:right" class="mono">${fmt(r.uc)}</td><td style="text-align:right" class="mono">${r.sp?fmt(r.sp):'--'}</td><td style="text-align:right;color:var(--green)">${r.sp&&r.uc?((r.sp-r.uc)/r.uc*100).toFixed(0)+'%':'--'}</td><td><button class="btn btn-s btn-d" onclick="delFG('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:14px;color:var(--text3)">No batches yet</td></tr>';}
+async function delFG(id){const d=await GFG();await sv('v2-fg',d.filter(r=>r.id!==id));toast('Deleted');renderFG();}
+
+// -- FIXED ASSETS --
+function calcDP(){const co=+document.getElementById('a-co').value||0,sv2=+document.getElementById('a-sv').value||0,li=+document.getElementById('a-li').value||1;const mo=f2((co-sv2)/li);document.getElementById('dp-mo').textContent=fmt(mo);document.getElementById('dp-an').textContent=fmt(mo*12);document.getElementById('dp-da').textContent=fmt(co-sv2);}
+async function saveFA(){const n=document.getElementById('a-n').value.trim(),co=+document.getElementById('a-co').value||0,li=+document.getElementById('a-li').value||1;if(!n||!co){toast('Enter name and cost',true);return;}const assets=await GFA();assets.push({id:'fa'+Date.now(),name:n,cat:document.getElementById('a-c').value,date:document.getElementById('a-d').value,cost:co,salvage:+document.getElementById('a-sv').value||0,life:li,vendor:document.getElementById('a-ve').value,inv:document.getElementById('a-iv').value,status:'active'});await sv('v2-fa',assets);toast('Asset added');clrFA();renderFA();renderFAm();}
+function clrFA(){['a-n','a-ve','a-iv'].forEach(id=>document.getElementById(id).value='');document.getElementById('a-co').value='';document.getElementById('a-sv').value=0;document.getElementById('a-li').value=36;calcDP();}
+async function retireFA(id){openModal('Retire asset','Asset fully depreciated. What would you like to do?','',[{label:'Retire',cls:'btn btn-p',fn:async()=>{const a=await GFA();const i=a.findIndex(x=>x.id===id);if(i>=0){a[i].status='retired';await sv('v2-fa',a);}closeModal();toast('Asset retired');renderFA();renderFAm();}},{label:'Keep active',cls:'btn',fn:closeModal}]);}
+async function renderFAm(){const assets=await GFA();const now=tm(td());const active=assets.filter(a=>a.status==='active');const tc=active.reduce((s,a)=>s+a.cost,0),ta=active.reduce((s,a)=>s+accumD(a,now),0),tbv=active.reduce((s,a)=>s+bv(a,now),0),fd=active.filter(a=>isFullD(a,now)).length;document.getElementById('fa-m').innerHTML=`<div class="met"><div class="ml">Active assets</div><div class="mv">${active.length}</div></div><div class="met"><div class="ml">Total cost</div><div class="mv">${fmt(tc)}</div></div><div class="met"><div class="ml">Accum. depr.</div><div class="mv rd">${fmt(ta)}</div></div><div class="met"><div class="ml">Net book value</div><div class="mv gn">${fmt(tbv)}</div></div><div class="met"><div class="ml">Fully depr.</div><div class="mv am">${fd}</div></div>`;}
+async function renderFA(){const assets=await GFA();const now=tm(td());const el=document.getElementById('fa-list');if(!assets.length){el.innerHTML='<p style="color:var(--text3);font-size:12px">No assets.</p>';return;}el.innerHTML=['Equipment','Tools'].map(cat=>{const g=assets.filter(a=>a.cat===cat);if(!g.length)return'';return`<div class="shd">${cat}</div>`+g.map(a=>{const ad=accumD(a,now),bval=bv(a,now),pct=Math.min(100,f2(ad/((a.cost-a.salvage)||1)*100));const bc=pct>=100?'var(--red)':pct>=75?'var(--amber)':'var(--green)';const rt=a.status==='retired',fd=isFullD(a,now);return`<div style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:7px;${rt?'opacity:.5':''}"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px"><div><div style="font-weight:600;font-size:13px">${a.name}</div><div style="font-size:11px;color:var(--text3)">${a.date} \u00B7 ${a.life}mo \u00B7 ${rt?'<span class="bdg b-x">Retired</span>':fd?'<span class="bdg b-a">Fully depr.</span>':'<span class="bdg b-g">Active</span>'}</div></div><div>${!rt?`<button class="btn btn-s btn-d" onclick="retireFA('${a.id}')">retire</button>`:''}</div></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:6px;font-size:12px;margin-bottom:7px"><div><div style="color:var(--text3)">Cost</div><div class="mono">${fmt(a.cost)}</div></div><div><div style="color:var(--text3)">Monthly depr.</div><div class="mono">${fmt(mDepr(a))}</div></div><div><div style="color:var(--text3)">Accum. depr.</div><div class="mono rd">${fmt(ad)}</div></div><div><div style="color:var(--text3)">Book value</div><div class="mono gn">${fmt(bval)}</div></div><div><div style="color:var(--text3)">% done</div><div>${pct.toFixed(0)}%</div></div></div><div class="prog"><div class="prog-f" style="width:${pct}%;background:${bc}"></div></div></div>`;}).join('');}).join('');}
+
+// -- DEPRECIATION --
+async function prevDepr(){
+  const period=document.getElementById('dp-per').value;if(!period){toast('Select period',true);return;}
+  const assets=await GFA(),runs=await GDR();
+  const already=runs.find(r=>r.period===period&&!r.reversed);
+  const prev=document.getElementById('dp-prev'),btn=document.getElementById('run-btn');
+  if(already){prev.style.display='block';prev.innerHTML='<div class="alert a-w">Already posted for this period. Reverse first.</div>';btn.style.display='none';return;}
+  const elig=assets.filter(a=>a.status==='active'&&tm(a.date)<=period&&!isFullD(a,addM(period,-1)));
+  if(!elig.length){prev.style.display='block';prev.innerHTML='<div class="alert a-i">No eligible assets this period.</div>';btn.style.display='none';return;}
+  let total=0;const rows=elig.map(a=>{const md=mDepr(a),bvB=bv(a,addM(period,-1)),act=f2(Math.min(md,bvB-a.salvage));total+=act;const fd=isFullD(a,period);return`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bg2);font-size:12px"><span>${a.name}</span><span class="mono rd">${fmt(act)}</span><span class="mono" style="color:var(--text3)">${fmt(bv(a,period))} BV</span>${fd?'<span class="bdg b-a">Full</span>':''}</div>`;}).join('');
+  prev.style.display='block';prev.innerHTML=`<div style="font-size:13px;font-weight:600;margin-bottom:7px">${elig.length} asset(s) \u00B7 Total: <span class="rd mono">${fmt(total)}</span></div>${rows}`;
+  btn.style.display='';
+}
+async function runDepr(){
+  const period=document.getElementById('dp-per').value;
+  const assets=await GFA(),runs=await GDR();
+  if(runs.find(r=>r.period===period&&!r.reversed)){toast('Already posted',true);return;}
+  const elig=assets.filter(a=>a.status==='active'&&tm(a.date)<=period&&!isFullD(a,addM(period,-1)));
+  if(!elig.length){toast('Nothing to depreciate',true);return;}
+  let total=0;const runEntries=[];const postDate=period+'-28';const jeEntries=[];
+  elig.forEach(a=>{const md=mDepr(a),bvB=bv(a,addM(period,-1)),act=f2(Math.min(md,bvB-a.salvage));total+=act;runEntries.push(a.id);const expAcct=a.cat==='Equipment'?'Depreciation Expense - Equipment':'Depreciation Expense - Tools';const accumAcct=a.cat==='Equipment'?'Accum. Depr. - Equipment':'Accum. Depr. - Tools';jeEntries.push(makeJE(postDate,expAcct,'debit',act,'depreciation',`Depreciation: ${a.name} (${period})`,`depr-${period}-${a.id}`));jeEntries.push(makeJE(postDate,accumAcct,'credit',act,'depreciation',`Depreciation: ${a.name} (${period})`,`depr-${period}-${a.id}`));});
+  const runId='run'+Date.now();runs.push({id:runId,period,postedDate:postDate,total:f2(total),assetCount:elig.length,reversed:false,entries:runEntries});
+  await sv('v2-dr',runs);await postJEs(jeEntries);
+  const fullyDone=elig.filter(a=>isFullD(a,period));
+  toast(`Depreciation posted ${period} \u00B7 ${fmt(total)} \u00B7 ${jeEntries.length} JEs`);
+  document.getElementById('run-btn').style.display='none';document.getElementById('dp-prev').style.display='none';
+  renderDH();
+  if(fullyDone.length){setTimeout(()=>{openModal('Assets fully depreciated',`${fullyDone.length} asset(s) reached \u20B10 book value.`,fullyDone.map(a=>`<div style="padding:4px 0;border-bottom:1px solid var(--bg2);font-size:13px">${a.name}</div>`).join(''),[{label:'Retire all',cls:'btn btn-w',fn:async()=>{const all=await GFA();fullyDone.forEach(a=>{const i=all.findIndex(x=>x.id===a.id);if(i>=0)all[i].status='retired';});await sv('v2-fa',all);closeModal();toast('Assets retired');renderFA();renderFAm();}},{label:'Keep active',cls:'btn',fn:closeModal}]);},600);}
+}
+async function reverseDepr(runId){openModal('Reverse depreciation run','This will delete all journal entries for this run.','',[{label:'Yes, reverse',cls:'btn btn-d',fn:async()=>{const runs=await GDR(),jes=await GJ();const run=runs.find(r=>r.id===runId);if(!run){closeModal();return;}run.reversed=true;await sv('v2-dr',runs);await sv('v2-je',jes.filter(j=>!(j.source==='depreciation'&&j.period===run.period&&run.entries.some(aid=>j.refId.includes(aid)))));toast('Reversed');closeModal();renderDH();}},{label:'Cancel',cls:'btn',fn:closeModal}]);}
+async function renderDH(){const runs=await GDR();const s=runs.sort((a,b)=>b.period.localeCompare(a.period));document.getElementById('dp-hist').innerHTML=s.length?s.map(r=>`<tr><td>${r.period}</td><td style="color:var(--text2)">${r.assetCount} asset(s)</td><td style="text-align:right" class="mono">${fmt(r.total)}</td><td>${r.reversed?'<span class="bdg b-r">Reversed</span>':'<span class="bdg b-g">Posted</span>'}</td><td>${!r.reversed?`<button class="btn btn-s btn-d" onclick="reverseDepr('${r.id}')">Reverse</button>`:''}</td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:14px;color:var(--text3)">No runs yet</td></tr>';}
+
+// -- JOURNAL --
+async function saveJE(){const am=+document.getElementById('j-am').value||0;if(!am){toast('Enter amount',true);return;}const r=makeJE(document.getElementById('j-d').value,document.getElementById('j-ac').value,document.getElementById('j-ty').value,am,'manual',document.getElementById('j-no').value,'');const d=await GJ();d.push(r);await sv('v2-je',d);toast('Entry posted');clrJE();renderJ();}
+function clrJE(){document.getElementById('j-am').value='';document.getElementById('j-no').value='';}
+async function delJE(id){const d=await GJ();await sv('v2-je',d.filter(r=>r.id!==id));toast('Deleted');renderJ();}
+async function renderJ(){
+  const data=await GJ();const q=(document.getElementById('j-sq').value||'').toLowerCase(),ft=document.getElementById('j-ft').value,fs=document.getElementById('j-fs').value;
+  const f=data.filter(r=>(!ft||r.type===ft)&&(!fs||r.source===fs)&&(!q||r.acct.toLowerCase().includes(q)||(r.desc||'').toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('j-cnt').textContent=f.length+' entries';
+  document.getElementById('j-tb').innerHTML=f.length?f.map(r=>`<tr><td>${r.date}</td><td>${r.period||''}</td><td title="${r.acct}">${r.acct}</td><td><span class="bdg ${r.type==='debit'?'b-a':'b-b'}">${r.type==='debit'?'Dr':'Cr'}</span></td><td style="text-align:right" class="mono">${fmt(r.amount)}</td><td><span class="bdg ${r.source==='depreciation'?'b-a':r.source==='purchase'?'b-b':r.source==='production'?'b-g':r.source==='ar'?'b-p':r.source==='ap'||r.source==='supplies'?'b-r':'b-x'}">${r.source}</span></td><td title="${r.desc||''}">${r.desc||'--'}</td><td><button class="btn btn-s btn-d" onclick="delJE('${r.id}')">del</button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;padding:14px;color:var(--text3)">No entries yet</td></tr>';
+  const dr=f.filter(r=>r.type==='debit').reduce((a,r)=>a+r.amount,0),cr=f.filter(r=>r.type==='credit').reduce((a,r)=>a+r.amount,0);
+  document.getElementById('j-tot').innerHTML=`<div class="met"><div class="ml">Total debits</div><div class="mv">${fmt(dr)}</div></div><div class="met"><div class="ml">Total credits</div><div class="mv">${fmt(cr)}</div></div><div class="met"><div class="ml">Difference</div><div class="mv ${Math.abs(dr-cr)<0.01?'gn':'rd'}">${fmt(Math.abs(dr-cr))}</div></div><div class="met"><div class="ml">Total entries</div><div class="mv">${f.length}</div></div>`;
+}
+
+// -- INCOME STATEMENT --
+async function popISPeriod(){
+  const jes=await GJ();const periods=[...new Set(jes.map(j=>j.period).filter(Boolean))].sort();
+  const sel=document.getElementById('is-period');
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All periods</option>'+periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+async function renderIS(){
+  const jes=await GJ();const period=document.getElementById('is-period').value;
+  const f=period==='all'?jes:jes.filter(j=>j.period===period);
+  const sum=(accts,type)=>f.filter(j=>accts.some(a=>j.acct.includes(a))&&j.type===type).reduce((a,j)=>a+j.amount,0);
+  const revFloat=sum(['Sales Revenue','Finished Goods - Floats'],'credit');
+  const revDrinks=sum(['Finished Goods - Drinks'],'credit');
+  const revPuto=sum(['Finished Goods - Puto'],'credit');
+  const totalRev=f.filter(j=>j.source==='ar'&&j.type==='credit'&&j.acct.includes('Sales Revenue')).reduce((a,j)=>a+j.amount,0)+f.filter(j=>j.source==='production'&&j.type==='debit'&&j.acct.includes('Finished Goods')).reduce((a,j)=>a+j.amount,0);
+  // Simpler: sum by account name
+  const byAcct=(acct,type)=>f.filter(j=>j.acct===acct&&j.type===type).reduce((a,j)=>a+j.amount,0);
+  const sales=await GS();const filt=period==='all'?sales:sales.filter(s=>tm(s.date)===period);
+  const tSales=filt.reduce((a,s)=>a+s.ts,0);
+  const tCOGS=filt.reduce((a,s)=>a+s.tc,0);
+  const tProfit=filt.reduce((a,s)=>a+s.profit,0);
+  const tComm=filt.reduce((a,s)=>a+s.comm,0);
+  const byCat=(cat)=>filt.filter(s=>s.cat===cat).reduce((a,s)=>a+s.ts,0);
+  const cogsByCat=(cat)=>filt.filter(s=>s.cat===cat).reduce((a,s)=>a+s.tc,0);
+  // Expenses from journal
+  const expItems=[
+    ['Salary Expense','Salary'],['Commission Expense','Commissions'],
+    ['Marketing Expense','Marketing'],['Delivery Expense','Delivery'],
+    ['Transportation Expense','Transportation'],['Meals & Entertainment','Meals & Entertainment'],
+    ['Supplies Expense','Supplies'],['R&D Expense','R&D'],
+    ['Spoilage/Damage','Spoilage/Damage'],['Depreciation Expense - Equipment','Depr. - Equipment'],
+    ['Depreciation Expense - Tools','Depr. - Tools'],['Other Expense','Other Expense']
+  ];
+  const expVals=expItems.map(([acct,label])=>[label,byAcct(acct,'debit')]);
+  const totalExp=expVals.reduce((a,[,v])=>a+v,0);
+  const otherInc=byAcct('Other Income','credit');
+  const netInc=tProfit-totalExp+otherInc;
+  const grossProfit=tSales-tCOGS;
+  const gm=tSales?grossProfit/tSales*100:0;
+  const nm=tSales?netInc/tSales*100:0;
+  document.getElementById('is-m').innerHTML=`<div class="met"><div class="ml">Net sales</div><div class="mv">${fmt(tSales)}</div></div><div class="met"><div class="ml">Gross profit</div><div class="mv ${grossProfit>=0?'gn':'rd'}">${fmt(grossProfit)}</div></div><div class="met"><div class="ml">Gross margin</div><div class="mv ${gm>=0?'gn':'rd'}">${gm.toFixed(1)}%</div></div><div class="met"><div class="ml">Net income</div><div class="mv ${netInc>=0?'gn':'rd'}">${fmt(netInc)}</div></div><div class="met"><div class="ml">Net margin</div><div class="mv ${nm>=0?'gn':'rd'}">${nm.toFixed(1)}%</div></div>`;
+  const fsRow=(label,val,indent,bold)=>`<div class="fs-row ${bold?'subtotal':''} ${indent?'fs-indent':''}"><span>${label}</span><span class="mono ${val<0?'rd':''}">${fmt(val)}</span></div>`;
+  document.getElementById('is-rev').innerHTML=[
+    fsRow('Floats',byCat('Floats'),true),fsRow('Drinks',byCat('Drinks'),true),
+    fsRow('Puto',byCat('Puto'),true),fsRow('Kakanin',byCat('Kakanin'),true),
+    `<div class="fs-row total"><span>Total net sales</span><span class="mono">${fmt(tSales)}</span></div>`
+  ].join('');
+  document.getElementById('is-cogs').innerHTML=[
+    fsRow('Floats',cogsByCat('Floats'),true),fsRow('Drinks',cogsByCat('Drinks'),true),
+    fsRow('Puto',cogsByCat('Puto'),true),fsRow('Kakanin',cogsByCat('Kakanin'),true),
+    `<div class="fs-row total"><span>Total COGS</span><span class="mono">${fmt(tCOGS)}</span></div>`,
+    `<div class="fs-row total"><span>Gross profit</span><span class="mono ${grossProfit>=0?'gn':'rd'}">${fmt(grossProfit)}</span></div>`
+  ].join('');
+  document.getElementById('is-opex').innerHTML=expVals.filter(([,v])=>v>0).map(([l,v])=>fsRow(l,v,true)).join('')+
+    (otherInc?fsRow('Other income',otherInc,true):'')+(tComm?fsRow('Commissions paid',tComm,true):'')+
+    `<div class="fs-row total"><span>Total expenses</span><span class="mono rd">${fmt(totalExp)}</span></div>`+
+    `<div class="fs-row total" style="font-size:15px"><span>Net income</span><span class="mono ${netInc>=0?'gn':'rd'}">${fmt(netInc)}</span></div>`;
+}
+
+// -- BALANCE SHEET --
+async function renderBS(){
+  const[ings,fa,ar,ap,jes,fg,sup]=await Promise.all([GI(),GFA(),GAR(),GAP(),GJ(),GFG(),GSU()]);
+  const now=tm(td());
+  // Assets
+  const rmPV=ings.filter(i=>['Angel','Jersey','Grahams','Mango','Doking','ACC','Milktea','Mr. Hat','Nescafe','Milo','Bakersfield','Banana','Eggs','Alaska','Cooking','Orion','Flour - 3rd','Sugar','Baking Soda','Dark Choc','Queso','Cassava','Coconut','Butter'].some(k=>i.name.includes(k))).reduce((a,i)=>a+ingBal(i)*ingFC(i),0);
+  const rmNPV=ings.filter(i=>['Bottle','Container','Sticker','Thank you','Spork','Hinged','Round','Clam','Paper'].some(k=>i.name.includes(k))).reduce((a,i)=>a+ingBal(i)*ingFC(i),0);
+  const fgV=fg.reduce((a,r)=>a+r.cost,0);
+  const cashJE=jes.filter(j=>j.acct==='Cash on Hand');
+  const cobJE=jes.filter(j=>j.acct==='Cash in Bank');
+  const cashBal=cashJE.reduce((a,j)=>a+(j.type==='debit'?j.amount:-j.amount),0);
+  const cobBal=cobJE.reduce((a,j)=>a+(j.type==='debit'?j.amount:-j.amount),0);
+  const arBals={};ar.forEach(r=>{arBals[r.party]=(arBals[r.party]||0)+(r.type==='invoice'?r.amount:r.type==='collection'?-r.amount:r.amount);});
+  const totalAR=Math.max(0,Object.values(arBals).reduce((a,v)=>a+v,0));
+  const toolsCost=fa.filter(a=>a.cat==='Tools').reduce((s,a)=>s+a.cost,0);
+  const eqCost=fa.filter(a=>a.cat==='Equipment').reduce((s,a)=>s+a.cost,0);
+  const accumTools=fa.filter(a=>a.cat==='Tools').reduce((s,a)=>s+accumD(a,now),0);
+  const accumEq=fa.filter(a=>a.cat==='Equipment').reduce((s,a)=>s+accumD(a,now),0);
+  const totalCA=cashBal+cobBal+fgV+rmPV+rmNPV+totalAR;
+  const totalNCA=toolsCost-accumTools+eqCost-accumEq;
+  const totalAssets=totalCA+totalNCA;
+  // Liabilities
+  const apBals={};ap.forEach(r=>{apBals[r.party]=(apBals[r.party]||0)+(r.type==='payable'?r.amount:r.type==='payment'?-r.amount:r.amount);});
+  const totalAP=Math.max(0,Object.values(apBals).reduce((a,v)=>a+v,0));
+  // Equity from journal
+  const totalRevJE=jes.filter(j=>j.acct==='Sales Revenue'&&j.type==='credit').reduce((a,j)=>a+j.amount,0);
+  const totalExpJE=jes.filter(j=>j.type==='debit'&&['Salary','Commission','Marketing','Delivery','Transport','Meals','Supplies','R&D','Spoilage','Depreciation','Other Expense'].some(k=>j.acct.includes(k))).reduce((a,j)=>a+j.amount,0);
+  const retainedEarnings=totalRevJE-totalExpJE;
+  const totalEquity=retainedEarnings;
+  const totalLE=totalAP+totalEquity;
+  const diff=totalAssets-totalLE;
+  document.getElementById('bs-m').innerHTML=`<div class="met"><div class="ml">Total assets</div><div class="mv">${fmt(totalAssets)}</div></div><div class="met"><div class="ml">Total liabilities</div><div class="mv rd">${fmt(totalAP)}</div></div><div class="met"><div class="ml">Owner's equity</div><div class="mv ${totalEquity>=0?'gn':'rd'}">${fmt(totalEquity)}</div></div><div class="met"><div class="ml">Balance check</div><div class="mv ${Math.abs(diff)<1?'gn':'rd'}">${Math.abs(diff)<1?'\u2713 Balanced':fmt(Math.abs(diff))+' diff'}</div></div>`;
+  const fsR=(l,v,i,b)=>`<div class="fs-row${b?' total':''} ${i?'fs-indent':''}"><span>${l}</span><span class="mono">${fmt(v)}</span></div>`;
+  document.getElementById('bs-assets').innerHTML=
+    '<div class="fs-section">Current Assets</div>'+
+    fsR('Cash on Hand',cashBal,true)+fsR('Cash in Bank',cobBal,true)+
+    fsR('Finished Goods',fgV,true)+fsR('Raw Materials - Perishables',rmPV,true)+
+    fsR('Raw Materials - Non Perishables',rmNPV,true)+
+    (totalAR?fsR('Accounts Receivable',totalAR,true):'')+ 
+    fsR('Total Current Assets',totalCA,false,true)+
+    '<div class="fs-section">Non-Current Assets</div>'+
+    fsR('Tools',toolsCost,true)+fsR('Accum. Depr. - Tools',-accumTools,true)+
+    fsR('Equipment',eqCost,true)+fsR('Accum. Depr. - Equipment',-accumEq,true)+
+    fsR('Total Non-Current Assets',totalNCA,false,true)+
+    `<div class="fs-row total" style="font-size:14px;margin-top:6px"><span>TOTAL ASSETS</span><span class="mono">${fmt(totalAssets)}</span></div>`;
+  document.getElementById('bs-le').innerHTML=
+    '<div class="fs-section">Liabilities</div>'+
+    Object.entries(apBals).filter(([,v])=>v>0).map(([k,v])=>fsR(k,v,true)).join('')+
+    fsR('Total Liabilities',totalAP,false,true)+
+    '<div class="fs-section">Owner\'s Equity</div>'+
+    fsR('Retained Earnings',retainedEarnings,true)+
+    fsR('Total Equity',totalEquity,false,true)+
+    `<div class="fs-row total" style="font-size:14px;margin-top:6px"><span>TOTAL L + EQUITY</span><span class="mono">${fmt(totalLE)}</span></div>`+
+    (Math.abs(diff)>=1?`<div class="alert a-w" style="margin-top:10px">\u26A0 Difference of ${fmt(Math.abs(diff))} -- some entries may need manual journal adjustments.</div>`:'<div class="alert a-s" style="margin-top:10px">\u2713 Balance sheet balances.</div>');
+}
+
+// -- RECIPES --
+let irIds=[];
+function addIR(){const id='ir'+Date.now()+Math.random().toString(36).slice(2,4);irIds.push(id);const d=document.createElement('div');d.id=id;d.style.cssText='display:flex;gap:5px;margin-bottom:5px;align-items:flex-end';d.innerHTML=`<div class="fg" style="flex:2"><label>Ingredient</label><input type="text" id="${id}i" placeholder="Name"></div><div class="fg" style="flex:.8"><label>Qty</label><input type="number" id="${id}q" step="0.001" min="0.001" placeholder="0"></div><div class="fg" style="width:50px"><label>Unit</label><input type="text" id="${id}u" placeholder="EA"></div><button class="btn btn-s btn-d" onclick="document.getElementById('${id}').remove();irIds=irIds.filter(x=>x!=='${id}')" style="margin-bottom:0">x</button>`;document.getElementById('r-il').appendChild(d);}
+async function saveRec(){const n=document.getElementById('r-n').value.trim(),cat=document.getElementById('r-c').value,u=+document.getElementById('r-u').value||1;if(!n){toast('Enter name',true);return;}const ings=irIds.map(id=>({ing:(document.getElementById(id+'i')?.value||'').trim(),qty:+document.getElementById(id+'q')?.value||0,unit:(document.getElementById(id+'u')?.value||'EA').trim()})).filter(i=>i.ing&&i.qty>0);if(!ings.length){toast('Add ingredients',true);return;}const recs=await GR();recs.push({id:'r'+Date.now(),name:n,cat,units:u,ings});await sv('v2-rec',recs);toast('Recipe saved');clrRec();renderRL();popRecSel();}
+function clrRec(){document.getElementById('r-n').value='';document.getElementById('r-u').value=1;document.getElementById('r-il').innerHTML='';irIds=[];}
+async function delRec(id){const d=await GR();await sv('v2-rec',d.filter(r=>r.id!==id));toast('Deleted');renderRL();popRecSel();}
+async function renderRL(){const recs=await GR();document.getElementById('r-list').innerHTML=recs.map(r=>`<div style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 13px;margin-bottom:7px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px">${r.name}</span><div style="display:flex;gap:5px"><span class="bdg b-b">${r.cat}</span><span class="bdg b-g">${r.units} units</span><button class="btn btn-s btn-d" onclick="delRec('${r.id}')">del</button></div></div><div style="font-size:11px;color:var(--text3)">${r.ings.map(i=>`${i.ing} x${i.qty} ${i.unit}`).join(' \u00B7 ')}</div></div>`).join('');}
+
+// -- MODAL --
+function openModal(title,sub,body,btns){document.getElementById('m-t').textContent=title;document.getElementById('m-s').textContent=sub;document.getElementById('m-b').innerHTML=body;document.getElementById('m-btns').innerHTML='';(btns||[]).forEach(b=>{const el=document.createElement('button');el.className=b.cls||'btn';el.textContent=b.label;el.onclick=b.fn;document.getElementById('m-btns').appendChild(el);});document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');pendProd=null;}
+
+// -- INIT --
+function init(){
+  try{
+    var apiUrl = localStorage.getItem(GS_API_URL_KEY);
+    var setupDone = localStorage.getItem('cc_setup_complete');
+    if(apiUrl || setupDone){
+      // Already completed setup before - go straight to login
+      // Ensure admin user exists
+      var raw = localStorage.getItem('cc_auth-users');
+      var users = raw ? JSON.parse(raw) : null;
+      if(!users || !users.length){
+        var admin = [{id:'u_admin',username:'admin',fullname:'Owner / Admin',
+          password:'admin123',role:'owner',status:'active',
+          createdAt:new Date().toISOString(),lastLogin:null,loginCount:0}];
+        localStorage.setItem('cc_auth-users', JSON.stringify(admin));
+      }
+      document.getElementById('setup-screen').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    } else {
+      // First time - show setup screen
+      document.getElementById('setup-screen').style.display='flex';
+      document.getElementById('login-screen').style.display='none';
+    }
+    document.getElementById('app-shell').style.display='none';
+  } catch(e){
+    console.error('init error:', e);
+    document.getElementById('setup-screen').style.display='flex';
+  }
+}
+init();
+</script>
+
+
+<!-- EXPORT MODAL -->
+<div id="export-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.38);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--surface,#fff);border:1px solid var(--border,#deded8);border-radius:10px;padding:22px;width:95%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.15);max-height:88vh;overflow-y:auto">
+    <div style="font-size:15px;font-weight:600;margin-bottom:3px">Export accounting data</div>
+    <div style="font-size:12px;color:var(--text2,#6b6b60);margin-bottom:16px">Select which modules to include in the Excel export</div>
+    <div id="export-checks" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button onclick="toggleAllExport(true)" style="padding:4px 10px;border:1px solid var(--border,#deded8);border-radius:5px;font-size:11px;cursor:pointer;background:var(--surface,#fff)">Select all</button>
+      <button onclick="toggleAllExport(false)" style="padding:4px 10px;border:1px solid var(--border,#deded8);border-radius:5px;font-size:11px;cursor:pointer;background:var(--surface,#fff)">Deselect all</button>
+    </div>
+    <div style="background:#f9f9f7;border-radius:6px;padding:9px 11px;font-size:11px;color:var(--text2,#6b6b60);margin-bottom:14px">
+      📁 Exports as <strong>CC_Books_Export.xlsx</strong> with one sheet per module. Data is current as of right now.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="export-btn-go" onclick="doExport()" style="padding:7px 18px;background:var(--text,#1c1c18);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font,sans-serif)">
+        Download Excel
+      </button>
+      <button onclick="document.getElementById('export-modal').style.display='none'" style="padding:7px 13px;border:1px solid var(--border,#deded8);border-radius:6px;font-size:12px;cursor:pointer;background:var(--surface,#fff);font-family:var(--font,sans-serif)">Cancel</button>
+      <span id="export-status" style="font-size:11px;color:var(--text2,#6b6b60)"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// -- TRIAL BALANCE --
+async function popTBPeriod(){
+  const jes = await GJ();
+  const periods = [...new Set(jes.map(j=>j.period).filter(Boolean))].sort();
+  const sel = document.getElementById('tb-period');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="all">All periods (cumulative)</option>' +
+    periods.map(p=>`<option value="${p}">${p}</option>`).join('');
+  if(cur) sel.value = cur;
+}
+
+async function renderTB(){
+  const [jes, coa] = await Promise.all([GJ(), GCOA()]);
+  const period = document.getElementById('tb-period').value;
+  const hideZero = document.getElementById('tb-zero').checked;
+  const fj = period === 'all' ? jes : jes.filter(j => j.period === period);
+
+  // Sum debits and credits per account name from filtered JEs
+  const drMap = {};
+  const crMap = {};
+  fj.forEach(j => {
+    if(j.type === 'debit')  drMap[j.acct] = (drMap[j.acct]||0) + j.amount;
+    if(j.type === 'credit') crMap[j.acct] = (crMap[j.acct]||0) + j.amount;
+  });
+
+  // Build set of all accounts that appear in JEs or COA
+  const jeAcctNames = [...new Set(fj.map(j=>j.acct))];
+  const coaMap = {};
+  coa.forEach(a => { coaMap[a.name] = a; });
+
+  // Merge: COA accounts + any JE accounts not in COA
+  const allAcctNames = [...new Set([
+    ...coa.filter(a=>a.status==='active').map(a=>a.name),
+    ...jeAcctNames
+  ])];
+
+  const COA_CLASS_ORDER = [
+    'asset-current','asset-noncurrent',
+    'liability-current','liability-noncurrent',
+    'equity','revenue','cogs','expense',
+    'other-income','other-expense'
+  ];
+
+  const COA_CLASS_LBL = {
+    'asset-current':'Asset -- Current',
+    'asset-noncurrent':'Asset -- Non-Current',
+    'liability-current':'Liability -- Current',
+    'liability-noncurrent':'Liability -- Non-Current',
+    'equity':"Owner's Equity",
+    'revenue':'Revenue',
+    'cogs':'COGS',
+    'expense':'Operating Expense',
+    'other-income':'Other Income',
+    'other-expense':'Other Expense',
+    '':'Unclassified'
+  };
+
+  // Build rows
+  let rows = allAcctNames.map(name => {
+    const a = coaMap[name];
+    const dr = f2(drMap[name]||0);
+    const cr = f2(crMap[name]||0);
+    const bal = f2(dr - cr);
+    return {
+      code: a?.code || '--',
+      name,
+      cls: a?.cls || '',
+      normal: a?.normal || (dr >= cr ? 'debit' : 'credit'),
+      dr, cr, bal
+    };
+  }).filter(r => !hideZero || r.dr !== 0 || r.cr !== 0);
+
+  // Sort: by COA class order then by code
+  rows.sort((a,b) => {
+    const ai = COA_CLASS_ORDER.indexOf(a.cls);
+    const bi = COA_CLASS_ORDER.indexOf(b.cls);
+    if(ai !== bi) return (ai===-1?99:ai) - (bi===-1?99:bi);
+    return a.code.localeCompare(b.code);
+  });
+
+  // Totals
+  const totalDr = f2(rows.reduce((s,r)=>s+r.dr, 0));
+  const totalCr = f2(rows.reduce((s,r)=>s+r.cr, 0));
+  const diff = f2(Math.abs(totalDr - totalCr));
+  const balanced = diff < 0.02;
+
+  // Metrics
+  document.getElementById('tb-m').innerHTML = `
+    <div class="met"><div class="ml">Accounts with activity</div><div class="mv">${rows.filter(r=>r.dr||r.cr).length}</div></div>
+    <div class="met"><div class="ml">Total debits</div><div class="mv">${fmt(totalDr)}</div></div>
+    <div class="met"><div class="ml">Total credits</div><div class="mv">${fmt(totalCr)}</div></div>
+    <div class="met"><div class="ml">Difference</div><div class="mv ${balanced?'gn':'rd'}">${fmt(diff)}</div></div>`;
+
+  // Balance check banner
+  document.getElementById('tb-balance-check').innerHTML = balanced
+    ? '<div class="alert a-s">\u2713 Trial balance is balanced -- total debits equal total credits.</div>'
+    : `<div class="alert a-w">\u26A0 Trial balance is out of balance by <strong>${fmt(diff)}</strong>. Check for missing or unmatched journal entries.</div>`;
+
+  // Group rows by classification
+  const groups = {};
+  rows.forEach(r => {
+    const k = r.cls || '';
+    if(!groups[k]) groups[k] = [];
+    groups[k].push(r);
+  });
+
+  let html = '';
+  [...COA_CLASS_ORDER, ''].forEach(cls => {
+    if(!groups[cls] || !groups[cls].length) return;
+    const grpDr = f2(groups[cls].reduce((s,r)=>s+r.dr,0));
+    const grpCr = f2(groups[cls].reduce((s,r)=>s+r.cr,0));
+    // Section header row
+    html += `<tr style="background:var(--bg)">
+      <td colspan="3" style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:8px 9px 4px">${COA_CLASS_LBL[cls]||cls}</td>
+      <td style="text-align:right;font-size:11px;font-weight:600;color:var(--text2);padding:8px 9px 4px" class="mono">${fmt(grpDr)}</td>
+      <td style="text-align:right;font-size:11px;font-weight:600;color:var(--text2);padding:8px 9px 4px" class="mono">${fmt(grpCr)}</td>
+      <td colspan="2" style="padding:8px 9px 4px"></td>
+    </tr>`;
+    groups[cls].forEach(r => {
+      const balColor = r.bal > 0 ? 'var(--green)' : r.bal < 0 ? 'var(--red)' : 'var(--text3)';
+      const isNormalSide = (r.normal==='debit'&&r.bal>=0)||(r.normal==='credit'&&r.bal<=0);
+      html += `<tr>
+        <td class="mono" style="color:var(--text3)">${r.code}</td>
+        <td style="font-weight:500">${r.name}</td>
+        <td style="font-size:11px;color:var(--text2)">${COA_CLASS_LBL[r.cls]||r.cls||'--'}</td>
+        <td style="text-align:right" class="mono">${r.dr ? fmt(r.dr) : '<span style="color:var(--text3)">--</span>'}</td>
+        <td style="text-align:right" class="mono">${r.cr ? fmt(r.cr) : '<span style="color:var(--text3)">--</span>'}</td>
+        <td style="text-align:right;color:${balColor};font-weight:600" class="mono">${fmt(Math.abs(r.bal))}</td>
+        <td><span class="bdg ${r.normal==='debit'?'b-a':'b-b'}">${r.normal==='debit'?'Dr':'Cr'}</span>${!isNormalSide&&(r.dr||r.cr)?'<span class="bdg b-r" style="margin-left:3px;font-size:9px">!</span>':''}</td>
+      </tr>`;
+    });
+  });
+
+  document.getElementById('tb-body').innerHTML = html ||
+    '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">No journal entries found for this period.</td></tr>';
+
+  // Totals footer
+  document.getElementById('tb-foot').innerHTML = `
+    <tr style="font-weight:700;border-top:2px solid var(--border2,#c8c8c0)">
+      <td colspan="3" style="padding:8px 9px;font-size:13px">TOTALS</td>
+      <td style="text-align:right;padding:8px 9px" class="mono">${fmt(totalDr)}</td>
+      <td style="text-align:right;padding:8px 9px" class="mono">${fmt(totalCr)}</td>
+      <td style="text-align:right;padding:8px 9px;color:${balanced?'var(--green)':'var(--red)'}" class="mono">${balanced ? '\u2713 Balanced' : fmt(diff)+' diff'}</td>
+      <td></td>
+    </tr>`;
+}
+
+
+// ========================================================
+// -- AUTH SYSTEM ------------------------------------------
+// ========================================================
+const AUTH_MODULES=[
+  'dashboard','sales','purchases','supplies','cash','ar','ap',
+  'rawmaterials','production','finishedgoods','fixedassets',
+  'depreciation','journal','reports','recipes','trialbalance',
+  'coa','soe','cashflow','users','audit'
+];
+const AUTH_MODULE_LABELS={
+  dashboard:'Dashboard',sales:'Sales',purchases:'Purchases',
+  supplies:'Supplies',cash:'Cash',ar:'AR',ap:'AP',
+  rawmaterials:'Raw Materials',production:'Production',
+  finishedgoods:'Finished Goods',fixedassets:'Fixed Assets',
+  depreciation:'Depreciation',journal:'Journal',
+  reports:'Reports (IS/BS)',recipes:'Recipes',
+  trialbalance:'Trial Balance',coa:'Chart of Accounts',
+  soe:"Owner's Equity",cashflow:'Cash Flow',
+  users:'User Management',audit:'Audit Trail'
+};
+
+const DEFAULT_ROLES=[
+  {id:'owner',name:'Owner',desc:'Full access to everything',locked:true,
+    perms:Object.fromEntries(AUTH_MODULES.map(m=>[m,{view:true,create:true,del:true}]))},
+  {id:'bookkeeper',name:'Bookkeeper',desc:'Can enter transactions -- no delete, no admin',locked:false,
+    perms:Object.fromEntries(AUTH_MODULES.map(m=>[m,{view:!['users','audit'].includes(m),create:!['users','audit'].includes(m),del:false}]))},
+  {id:'auditor',name:'Auditor',desc:'View-only access to everything including audit trail',locked:false,
+    perms:Object.fromEntries(AUTH_MODULES.map(m=>[m,{view:true,create:false,del:false}]))},
+  {id:'viewer',name:'Viewer',desc:'View-only -- no admin or audit',locked:false,
+    perms:Object.fromEntries(AUTH_MODULES.map(m=>[m,{view:!['users','audit'].includes(m),create:false,del:false}]))}
+];
+
+const DEFAULT_USERS=[
+  {id:'u_admin',username:'admin',fullname:'Owner / Admin',password:'admin123',
+   role:'owner',status:'active',createdAt:new Date().toISOString(),lastLogin:null,loginCount:0}
+];
+
+let SESSION=null;
+
+const GUSERS=async()=>{
+  var raw=localStorage.getItem('cc_auth-users');
+  if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+  return (await ld('auth-users'))||[];
+};
+const GROLES=async()=>{
+  var raw=localStorage.getItem('cc_auth-roles');
+  if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+  return (await ld('auth-roles'))||[];
+};
+const GAUTLOG=async()=>(await ld('auth-audit'))||[];
+
+async function initAuth(){
+  // Always ensure roles exist
+  let roles=await ld('auth-roles');
+  if(!roles||!Array.isArray(roles)||roles.length===0){
+    await sv('auth-roles',DEFAULT_ROLES);
+    roles=DEFAULT_ROLES;
+  } else {
+    const ids=roles.map(r=>r.id);
+    const missing=DEFAULT_ROLES.filter(r=>!ids.includes(r.id));
+    if(missing.length){await sv('auth-roles',[...roles,...missing]);roles=[...roles,...missing];}
+  }
+  // Always ensure admin user exists
+  let users=await ld('auth-users');
+  if(!users||!Array.isArray(users)||users.length===0){
+    await sv('auth-users',DEFAULT_USERS);
+  } else {
+    // Ensure admin user always exists and is active
+    const hasAdmin=users.find(u=>u.id==='u_admin');
+    if(!hasAdmin){
+      users.unshift(DEFAULT_USERS[0]);
+      await sv('auth-users',users);
+    }
+  }
+}
+
+async function logAudit(action,module,description,detail){
+  if(!SESSION)return;
+  const trail=await GAUTLOG();
+  trail.push({
+    id:'al'+Date.now()+Math.random().toString(36).slice(2,5),
+    ts:new Date().toISOString(),
+    userId:SESSION.id,username:SESSION.username,
+    fullname:SESSION.fullname,role:SESSION.role,
+    roleName:SESSION.roleName||SESSION.role,
+    action,module,description,detail:detail||''
+  });
+  await sv('auth-audit',trail);
+}
+
+async function doLogin(){
+  const un=document.getElementById('l-user').value.trim();
+  const pw=document.getElementById('l-pass').value;
+  const errEl=document.getElementById('login-err');
+  errEl.style.display='none';
+  try{
+    // Always read from localStorage first (bypasses cache issues)
+    var users = null;
+    var localRaw = localStorage.getItem('cc_auth-users');
+    if(localRaw){ try{ users = JSON.parse(localRaw); }catch(e){ users = null; } }
+    // If not in localStorage, try Google Sheets directly
+    if(!users || !users.length){
+      try{
+        var gsResult = await apiFetch({action:'get', key:'auth-users'});
+        if(gsResult && gsResult.value){
+          users = JSON.parse(gsResult.value);
+          localStorage.setItem('cc_auth-users', JSON.stringify(users));
+        }
+      }catch(e){ console.warn('GS read on login:', e); }
+    }
+    // If still nothing, seed admin now and use it
+    if(!users || !users.length){
+      users = JSON.parse(JSON.stringify(DEFAULT_USERS));
+      localStorage.setItem('cc_auth-users', JSON.stringify(users));
+      sv('auth-users', users).catch(function(e){ console.warn(e); });
+    }
+    // Ensure roles exist in localStorage
+    if(!localStorage.getItem('cc_auth-roles')){
+      localStorage.setItem('cc_auth-roles', JSON.stringify(DEFAULT_ROLES));
+      sv('auth-roles', DEFAULT_ROLES).catch(function(e){ console.warn(e); });
+    }
+    const user=users.find(u=>u.username===un&&u.password===pw&&u.status==='active');
+    if(!user){
+      errEl.textContent='Incorrect username or password. ('+users.length+' user(s) in storage)';
+      errEl.style.display='block';return;
+    }
+  user.lastLogin=new Date().toISOString();
+  user.loginCount=(user.loginCount||0)+1;
+  await sv('auth-users',users);
+  const roles=await GROLES();
+  const role=roles.find(r=>r.id===user.role);
+  SESSION={id:user.id,username:user.username,fullname:user.fullname,
+    role:user.role,roleName:role?.name||user.role,perms:role?.perms||{}};
+    await logAudit('LOGIN','auth',user.fullname+' signed in','');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-shell').style.display='block';
+    document.getElementById('ub-name').textContent=user.fullname;
+    document.getElementById('ub-role').textContent=SESSION.roleName;
+    applyPermissions();
+    buildPermGrid();
+    // Set default dates now that we're in the app
+    [['s-d','j-d','pb-d','a-d','c-d','ar-d','ap-d','su-od','su-rd'],['p-od','p-rd']].flat().forEach(function(id){var el=document.getElementById(id);if(el)el.value=td();});
+    var dpEl=document.getElementById('dp-per');if(dpEl)dpEl.value=tm(td());
+    var afFrom=document.getElementById('af-from');if(afFrom)afFrom.value=new Date(Date.now()-30*86400000).toISOString().split('T')[0];
+    var afTo=document.getElementById('af-to');if(afTo)afTo.value=td();
+    // Seed reference data in background after login
+    initData().catch(function(e){console.warn('initData error',e);});
+    initCOA().catch(function(e){console.warn('initCOA error',e);});
+    show('dash');
+    renderDash();
+  }catch(e){
+    errEl.textContent='Login error: '+e.message;
+    errEl.style.display='block';
+    console.error('Login error:',e);
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  const ls=document.getElementById('login-screen');
+  if(e.key==='Enter'&&ls&&ls.style.display!=='none') doLogin();
+});
+
+async function doLogout(){
+  await logAudit('LOGOUT','auth',`${SESSION?.fullname||'User'} signed out`,'');
+  SESSION=null;
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('l-user').value='';
+  document.getElementById('l-pass').value='';
+  document.getElementById('login-err').style.display='none';
+}
+
+function canDo(module,action){
+  if(!SESSION)return false;
+  const perm=SESSION.perms[module];
+  if(!perm)return false;
+  return action==='view'?perm.view:action==='create'?perm.create:perm.del;
+}
+
+function applyPermissions(){
+  if(!SESSION)return;
+  // tab-users and tab-audit visibility
+  const tabUsers=document.getElementById('tab-users');
+  const tabAudit=document.getElementById('tab-audit');
+  if(tabUsers) tabUsers.style.display=canDo('users','view')?'':'none';
+  if(tabAudit) tabAudit.style.display=canDo('audit','view')?'':'none';
+}
+
+const fmtDT=s=>{if(!s)return'--';const d=new Date(s);return d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'2-digit'})+' '+d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true});};
+
+// -- USER MANAGEMENT --
+async function renderUsersView(){
+  if(!canDo('users','view')){
+    document.getElementById('usr-tb').innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3)">Access denied</td></tr>';
+    return;
+  }
+  const [users,roles]=await Promise.all([GUSERS(),GROLES()]);
+  // populate role select
+  const rsel=document.getElementById('uu-role');
+  rsel.innerHTML=roles.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  showRolePrev();
+  const now=new Date().toISOString().split('T')[0];
+  document.getElementById('umgr-m').innerHTML=`
+    <div class="met"><div class="ml">Total users</div><div class="mv">${users.length}</div></div>
+    <div class="met"><div class="ml">Active</div><div class="mv gn">${users.filter(u=>u.status==='active').length}</div></div>
+    <div class="met"><div class="ml">Roles defined</div><div class="mv">${roles.length}</div></div>`;
+  document.getElementById('usr-tb').innerHTML=users.map(u=>{
+    const r=roles.find(x=>x.id===u.role);
+    const isMe=SESSION?.id===u.id;
+    return`<tr>
+      <td class="mono">${u.username}</td>
+      <td>${u.fullname}</td>
+      <td><span class="bdg b-b">${r?.name||u.role}</span></td>
+      <td><span class="bdg ${u.status==='active'?'b-g':'b-r'}">${u.status}</span></td>
+      <td style="font-size:11px;color:var(--text3)">${fmtDT(u.lastLogin)}</td>
+      <td style="text-align:center">${u.loginCount||0}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn btn-s" onclick="editUsrModal('${u.id}')">Edit</button>
+        ${u.status==='active'&&!isMe?`<button class="btn btn-s btn-d" onclick="toggleUsr('${u.id}','inactive')">Disable</button>`:''}
+        ${u.status==='inactive'?`<button class="btn btn-s" onclick="toggleUsr('${u.id}','active')">Enable</button>`:''}
+        ${!isMe&&u.id!=='u_admin'?`<button class="btn btn-s btn-d" onclick="delUsr('${u.id}')">Del</button>`:''}
+      </td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7" style="text-align:center;padding:14px;color:var(--text3)">No users</td></tr>';
+  renderRolesList();
+}
+
+function showRolePrev(){
+  const id=document.getElementById('uu-role')?.value;
+  if(!id)return;
+  GROLES().then(roles=>{
+    const r=roles.find(x=>x.id===id);
+    const el=document.getElementById('role-prev-desc');
+    if(r&&el)el.textContent=r.desc||'No description';
+  });
+}
+
+async function saveUsr(){
+  if(!canDo('users','create')){toast('No permission',true);return;}
+  const un=document.getElementById('uu-un').value.trim(),fn=document.getElementById('uu-fn').value.trim();
+  const pw=document.getElementById('uu-pw').value,role=document.getElementById('uu-role').value;
+  if(!un||!fn||!pw||pw.length<6){toast('Fill all fields. Password min 6 chars.',true);return;}
+  const users=await GUSERS();
+  if(users.find(u=>u.username===un)){toast('Username already exists',true);return;}
+  users.push({id:'u'+Date.now(),username:un,fullname:fn,password:pw,role,
+    status:'active',createdAt:new Date().toISOString(),lastLogin:null,loginCount:0});
+  await sv('auth-users',users);
+  await logAudit('CREATE','users',`Created user: ${fn} (${un}) role: ${role}`,'');
+  toast('User added');
+  ['uu-un','uu-fn','uu-pw'].forEach(id=>document.getElementById(id).value='');
+  renderUsersView();
+}
+
+async function toggleUsr(id,status){
+  const users=await GUSERS();const u=users.find(x=>x.id===id);if(!u)return;
+  u.status=status;await sv('auth-users',users);
+  await logAudit('EDIT','users',`User ${u.fullname} status -> ${status}`,'');
+  toast('Updated');renderUsersView();
+}
+
+async function delUsr(id){
+  const users=await GUSERS();const u=users.find(x=>x.id===id);
+  openModal('Delete user',`Delete ${u?.fullname}? Cannot be undone.`,'',[
+    {label:'Delete',cls:'btn btn-d',fn:async()=>{
+      await sv('auth-users',users.filter(x=>x.id!==id));
+      await logAudit('DELETE','users',`Deleted user: ${u?.fullname} (${u?.username})`,'');
+      toast('Deleted');closeModal();renderUsersView();
+    }},{label:'Cancel',cls:'btn',fn:closeModal}
+  ]);
+}
+
+async function editUsrModal(id){
+  const [users,roles]=await Promise.all([GUSERS(),GROLES()]);
+  const u=users.find(x=>x.id===id);if(!u)return;
+  openModal('Edit user',u.fullname,
+    `<div class="fgrid">
+      <div class="fg"><label>Full name</label><input type="text" id="eu-fn" value="${u.fullname}"></div>
+      <div class="fg"><label>New password (blank = keep)</label><input type="password" id="eu-pw" placeholder="New password"></div>
+      <div class="fg"><label>Role</label><select id="eu-role">${roles.map(r=>`<option value="${r.id}"${r.id===u.role?' selected':''}>${r.name}</option>`).join('')}</select></div>
+    </div>`,
+    [{label:'Save',cls:'btn btn-p',fn:async()=>{
+      const fn=document.getElementById('eu-fn').value.trim();
+      const pw=document.getElementById('eu-pw').value;
+      const role=document.getElementById('eu-role').value;
+      if(!fn){toast('Name required',true);return;}
+      const changed=[];
+      if(fn!==u.fullname)changed.push(`name->${fn}`);
+      if(role!==u.role)changed.push(`role->${role}`);
+      if(pw)changed.push('password changed');
+      u.fullname=fn;u.role=role;if(pw&&pw.length>=6)u.password=pw;
+      await sv('auth-users',users);
+      await logAudit('EDIT','users',`Edited: ${fn} (${u.username})`,changed.join(', '));
+      if(SESSION?.id===id){
+        SESSION.fullname=fn;SESSION.role=role;
+        const nr=roles.find(x=>x.id===role);
+        SESSION.roleName=nr?.name||role;SESSION.perms=nr?.perms||{};
+        document.getElementById('ub-name').textContent=fn;
+        document.getElementById('ub-role').textContent=SESSION.roleName;
+        applyPermissions();
+      }
+      toast('Saved');closeModal();renderUsersView();
+    }},{label:'Cancel',cls:'btn',fn:closeModal}]
+  );
+}
+
+// -- ROLES --
+function buildPermGrid(existing){
+  const grid=document.getElementById('perm-grid');
+  if(!grid)return;
+  const hdrs=Array.from(grid.children).slice(0,4);
+  grid.innerHTML='';hdrs.forEach(h=>grid.appendChild(h));
+  AUTH_MODULES.forEach(m=>{
+    const ep=existing?.[m];
+    grid.innerHTML+=`
+      <div class="perm-cell" style="font-weight:500;padding:5px 9px;border-bottom:1px solid var(--bg2)">${AUTH_MODULE_LABELS[m]||m}</div>
+      <div class="perm-cell" style="border-bottom:1px solid var(--bg2)"><input type="checkbox" id="pm-${m}-v"${ep?.view?' checked':''}></div>
+      <div class="perm-cell" style="border-bottom:1px solid var(--bg2)"><input type="checkbox" id="pm-${m}-c"${ep?.create?' checked':''}></div>
+      <div class="perm-cell" style="border-bottom:1px solid var(--bg2)"><input type="checkbox" id="pm-${m}-d"${ep?.del?' checked':''}></div>`;
+  });
+}
+
+async function saveRole(){
+  const name=document.getElementById('rl-name').value.trim();
+  const desc=document.getElementById('rl-desc').value.trim();
+  if(!name){toast('Enter role name',true);return;}
+  const perms={};
+  AUTH_MODULES.forEach(m=>{perms[m]={
+    view:document.getElementById(`pm-${m}-v`)?.checked||false,
+    create:document.getElementById(`pm-${m}-c`)?.checked||false,
+    del:document.getElementById(`pm-${m}-d`)?.checked||false
+  };});
+  const roles=await GROLES();
+  const ei=roles.findIndex(r=>r.name.toLowerCase()===name.toLowerCase()&&!r.locked);
+  if(ei>=0){roles[ei]={...roles[ei],name,desc,perms};await sv('auth-roles',roles);await logAudit('EDIT','users',`Updated role: ${name}`,'');toast('Role updated');}
+  else{roles.push({id:'role'+Date.now(),name,desc,locked:false,perms});await sv('auth-roles',roles);await logAudit('CREATE','users',`Created role: ${name}`,'');toast('Role created');}
+  clrRoleForm();renderRolesList();
+  const rsel=document.getElementById('uu-role');
+  if(rsel)rsel.innerHTML=(await GROLES()).map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+}
+
+function clrRoleForm(){
+  document.getElementById('rl-name').value='';
+  document.getElementById('rl-desc').value='';
+  buildPermGrid();
+}
+
+async function editRoleForm(id){
+  const roles=await GROLES();const r=roles.find(x=>x.id===id);
+  if(!r||r.locked)return;
+  document.getElementById('rl-name').value=r.name;
+  document.getElementById('rl-desc').value=r.desc||'';
+  buildPermGrid(r.perms);
+  document.getElementById('rl-name').scrollIntoView({behavior:'smooth'});
+  toast('Role loaded -- edit and save');
+}
+
+async function delRole(id){
+  const roles=await GROLES();const r=roles.find(x=>x.id===id);
+  if(r?.locked){toast('Built-in roles cannot be deleted',true);return;}
+  openModal('Delete role',`Delete role "${r?.name}"?`,'',[
+    {label:'Delete',cls:'btn btn-d',fn:async()=>{
+      await sv('auth-roles',roles.filter(x=>x.id!==id));
+      await logAudit('DELETE','users',`Deleted role: ${r?.name}`,'');
+      toast('Deleted');closeModal();renderRolesList();
+    }},{label:'Cancel',cls:'btn',fn:closeModal}
+  ]);
+}
+
+async function renderRolesList(){
+  const roles=await GROLES();
+  const el=document.getElementById('roles-list');
+  if(!el)return;
+  el.innerHTML=roles.map(r=>{
+    const vc=AUTH_MODULES.filter(m=>r.perms[m]?.view).length;
+    const cc=AUTH_MODULES.filter(m=>r.perms[m]?.create).length;
+    const dc=AUTH_MODULES.filter(m=>r.perms[m]?.del).length;
+    return`<div style="border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px;margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+        <div>
+          <span style="font-weight:600;font-size:13px">${r.name}</span>
+          ${r.locked?'<span class="bdg b-x" style="margin-left:5px;font-size:9px">built-in</span>':''}
+          <div style="font-size:11px;color:var(--text2);margin-top:1px">${r.desc||''}</div>
+        </div>
+        <div style="display:flex;gap:5px">
+          ${!r.locked?`<button class="btn btn-s" onclick="editRoleForm('${r.id}')">Edit</button><button class="btn btn-s btn-d" onclick="delRole('${r.id}')">Del</button>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:11px;color:var(--text2)">
+        <span>\u1F441 View: <strong>${vc}</strong></span>
+        <span> Create: <strong>${cc}</strong></span>
+        <span>\u1F5D1 Delete: <strong>${dc}</strong></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// -- AUDIT TRAIL --
+function auditHTML(a){
+  const ac={CREATE:'b-g',EDIT:'b-b',DELETE:'b-r',LOGIN:'b-p',LOGOUT:'b-x'}[a.action]||'b-x';
+  return`<div class="audit-entry">
+    <div class="audit-meta">
+      <span class="bdg ${ac}">${a.action}</span>
+      <span style="font-size:11px;color:var(--text2);font-weight:500">${a.module}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">${fmtDT(a.ts)}</span>
+      <span class="bdg b-x">${a.username}</span>
+      <span style="font-size:10px;color:var(--text3)">${a.roleName||a.role||''}</span>
+    </div>
+    <div style="font-size:12px">${a.description}</div>
+    ${a.detail?`<div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px">${a.detail}</div>`:''}
+  </div>`;
+}
+
+async function renderAuditV(){
+  const trail=await GAUTLOG();
+  const users=[...new Set(trail.map(a=>a.username))];
+  const mods=[...new Set(trail.map(a=>a.module))];
+  const fuEl=document.getElementById('af-user');
+  const fmEl=document.getElementById('af-mod');
+  if(fuEl) fuEl.innerHTML='<option value="">All users</option>'+users.map(u=>`<option value="${u}">${u}</option>`).join('');
+  if(fmEl) fmEl.innerHTML='<option value="">All modules</option>'+mods.map(m=>`<option value="${m}">${m}</option>`).join('');
+  const fu=fuEl?.value||'',fm=fmEl?.value||'';
+  const fa=document.getElementById('af-act')?.value||'';
+  const ffrom=document.getElementById('af-from')?.value||'';
+  const fto=document.getElementById('af-to')?.value||'';
+  const f=trail.filter(a=>{
+    if(fu&&a.username!==fu)return false;
+    if(fm&&a.module!==fm)return false;
+    if(fa&&a.action!==fa)return false;
+    if(ffrom&&a.ts.slice(0,10)<ffrom)return false;
+    if(fto&&a.ts.slice(0,10)>fto)return false;
+    return true;
+  }).sort((a,b)=>b.ts.localeCompare(a.ts));
+
+  const cEl=document.getElementById('audit-cnt');
+  if(cEl)cEl.textContent=`-- ${f.length} entries`;
+
+  const creates=trail.filter(a=>a.action==='CREATE').length;
+  const edits=trail.filter(a=>a.action==='EDIT').length;
+  const deletes=trail.filter(a=>a.action==='DELETE').length;
+  const mEl=document.getElementById('audit-m');
+  if(mEl)mEl.innerHTML=`
+    <div class="met"><div class="ml">Total logs</div><div class="mv">${trail.length}</div></div>
+    <div class="met"><div class="ml">Creates</div><div class="mv gn">${creates}</div></div>
+    <div class="met"><div class="ml">Edits</div><div class="mv bl">${edits}</div></div>
+    <div class="met"><div class="ml">Deletes</div><div class="mv rd">${deletes}</div></div>`;
+
+  const lEl=document.getElementById('audit-list');
+  if(lEl)lEl.innerHTML=f.length?f.map(auditHTML).join(''):'<div style="padding:24px;text-align:center;color:var(--text3);font-size:12px">No entries match filters</div>';
+}
+
+function clrAuditFilters(){
+  ['af-user','af-mod','af-act'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('af-from').value='';
+  document.getElementById('af-to').value='';
+  renderAuditV();
+}
+
+async function cnfClearAudit(){
+  openModal('Clear all audit logs','This permanently deletes all audit logs. Are you sure?','',[
+    {label:'Clear all',cls:'btn btn-d',fn:async()=>{
+      await sv('auth-audit',[]);
+      await logAudit('DELETE','audit','Cleared all audit logs','');
+      closeModal();toast('Audit logs cleared');renderAuditV();
+    }},{label:'Cancel',cls:'btn',fn:closeModal}
+  ]);
+}
+
+// -- AUDIT HOOKS -- wrap save/delete functions --
+function wrapWithAudit(origFn, action, module, descFn){
+  return async function(...args){
+    const result = await origFn.apply(this, args);
+    await logAudit(action, module, typeof descFn==='function'?descFn(...args):descFn, '');
+    return result;
+  };
+}
+
+// -- EXPORT MODULE --
+const EXPORT_MODULES = [
+  {key:'sales',     label:'Sales',          storageKey:'v2-sales'},
+  {key:'purchases', label:'Purchases',      storageKey:'v2-purch'},
+  {key:'supplies',  label:'Supplies',       storageKey:'v2-sup'},
+  {key:'cash',      label:'Cash',           storageKey:'v2-cash'},
+  {key:'ar',        label:'AR',             storageKey:'v2-ar'},
+  {key:'ap',        label:'AP',             storageKey:'v2-ap'},
+  {key:'rawmat',    label:'Raw Materials',  storageKey:'v2-ings'},
+  {key:'fg',        label:'Finished Goods', storageKey:'v2-fg'},
+  {key:'assets',    label:'Fixed Assets',   storageKey:'v2-fa'},
+  {key:'depr',      label:'Depreciation Runs', storageKey:'v2-dr'},
+  {key:'journal',   label:'Journal Entries',storageKey:'v2-je'},
+  {key:'recipes',   label:'Recipes',        storageKey:'v2-rec'},
+  {key:'coa',      label:'Chart of Accounts', storageKey:'v2-coa'},
+  {key:'tb',       label:'Trial Balance',     storageKey:'v2-je'},
+];
+
+function showExportModal(){
+  const el=document.getElementById('export-checks');
+  el.innerHTML=EXPORT_MODULES.map(m=>`
+    <label style="display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;padding:6px 8px;border:1px solid var(--border,#deded8);border-radius:6px;background:var(--bg,#fafaf8)">
+      <input type="checkbox" id="exp-${m.key}" checked style="width:14px;height:14px;accent-color:var(--accent,#2d6a4f)">
+      <span>${m.label}</span>
+    </label>`).join('');
+  document.getElementById('export-status').textContent='';
+  document.getElementById('export-modal').style.display='flex';
+}
+
+function toggleAllExport(val){
+  EXPORT_MODULES.forEach(m=>{const el=document.getElementById('exp-'+m.key);if(el)el.checked=val;});
+}
+
+function flattenForSheet(key, data){
+  if(!data||!data.length)return[['No data']];
+  // Custom column orders per module
+  const cols={
+    'v2-sales':['date','sp','customer','cat','prod','qty','uc','tc','up','ts','profit','commRate','comm','mop','notes'],
+    'v2-purch':['received','ordered','store','vendor','inv','item','unit','qty','up','total','acct','mop'],
+    'v2-sup':['received','ordered','store','vendor','inv','item','unit','qty','up','total','mop','notes'],
+    'v2-cash':['date','acct','type','amount','dir','balance','notes'],
+    'v2-ar':['date','party','type','amount','ref','notes'],
+    'v2-ap':['date','party','type','amount','ref','notes'],
+    'v2-fg':['date','batch','desc','cat','qty','uc','sp','cost','notes'],
+    'v2-fa':['name','cat','date','cost','salvage','life','vendor','inv','status'],
+    'v2-dr':['period','postedDate','total','assetCount','reversed'],
+    'v2-je':['date','period','acct','type','amount','source','desc'],
+    'v2-rec':['name','cat','units'],
+  };
+  const colOrder=cols[key];
+  let headers;
+  if(colOrder){
+    // Use defined order, adding any extra keys found in data
+    const extra=Object.keys(data[0]).filter(k=>!colOrder.includes(k)&&k!=='id'&&k!=='lots'&&k!=='ings'&&k!=='entries');
+    headers=[...colOrder,...extra];
+  } else {
+    headers=Object.keys(data[0]).filter(k=>k!=='id'&&k!=='lots'&&k!=='ings'&&k!=='entries');
+  }
+  // Human-readable header labels
+  const lblMap={date:'Date',sp:'Sales Point',customer:'Customer',cat:'Category',prod:'Product Code',qty:'Qty',uc:'Unit Cost',tc:'Total Cost',up:'Unit Price',ts:'Total Sales',profit:'Profit',commRate:'Comm Rate %',comm:'Commission',mop:'MOP',notes:'Notes',received:'Date Received',ordered:'Date Ordered',store:'Store',vendor:'Vendor',inv:'Invoice #',item:'Item',unit:'Unit',total:'Total Amount',acct:'Account',dir:'Direction',balance:'Balance After',party:'Party',type:'Type',amount:'Amount',ref:'Reference',batch:'Batch Code',desc:'Description',cost:'Total Cost',uc:'Unit Cost',sp:'Selling Price',name:'Name',life:'Useful Life (mo)',salvage:'Salvage Value',status:'Status',period:'Period',postedDate:'Posted Date',assetCount:'# Assets',reversed:'Reversed',source:'Source',perms:'Permissions'};
+  const hdrs=headers.map(h=>lblMap[h]||h.charAt(0).toUpperCase()+h.slice(1));
+  const rows=data.map(r=>headers.map(h=>{
+    const v=r[h];
+    if(v===null||v===undefined)return'';
+    if(typeof v==='object')return JSON.stringify(v);
+    return v;
+  }));
+  return[hdrs,...rows];
+}
+
+function flattenIngredients(data){
+  if(!data||!data.length)return[['No data']];
+  const rows=[['Name','Unit','Low Threshold','# FIFO Lots','Total Balance','Avg Unit Cost','Total Stock Value']];
+  data.forEach(i=>{
+    const bal=(i.lots||[]).reduce((a,l)=>a+l.qty,0);
+    const val=(i.lots||[]).reduce((a,l)=>a+l.qty*l.uc,0);
+    const avgUC=bal>0?val/bal:0;
+    rows.push([i.name,i.unit,i.thresh,(i.lots||[]).length,+bal.toFixed(4),+avgUC.toFixed(4),+val.toFixed(2)]);
+  });
+  return rows;
+}
+
+function flattenFIFOLots(data){
+  if(!data||!data.length)return[['No data']];
+  const rows=[['Ingredient','Unit','Lot Date','Lot Qty','Unit Cost','Lot Value']];
+  data.forEach(i=>{
+    (i.lots||[]).forEach(l=>{
+      rows.push([i.name,i.unit,l.date,l.qty,l.uc,+(l.qty*l.uc).toFixed(2)]);
+    });
+  });
+  return rows.length>1?rows:[['No FIFO lots']];
+}
+
+function flattenRecipes(data){
+  if(!data||!data.length)return[['No data']];
+  const rows=[['Recipe Name','Category','Units Per Batch','Ingredient','Qty','Unit']];
+  data.forEach(r=>{
+    if(!r.ings||!r.ings.length){rows.push([r.name,r.cat,r.units,'','','']);}
+    else{r.ings.forEach((ing,i)=>{rows.push([i===0?r.name:'',i===0?r.cat:'',i===0?r.units:'',ing.ing,ing.qty,ing.unit]);});}
+  });
+  return rows;
+}
+
+function styleSheet(ws, headerRow){
+  // Bold header row
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  for(let c=range.s.c;c<=range.e.c;c++){
+    const cell=ws[XLSX.utils.encode_cell({r:0,c})];
+    if(cell){cell.s={font:{bold:true},fill:{fgColor:{rgb:'2D6A4F'}},font:{bold:true,color:{rgb:'FFFFFF'}}};}
+  }
+  return ws;
+}
+
+async function doExport(){
+  const btn=document.getElementById('export-btn-go');
+  const status=document.getElementById('export-status');
+  btn.textContent='Preparing\u2026';btn.disabled=true;status.textContent='';
+  try{
+    const wb=XLSX.utils.book_new();
+    // Summary sheet
+    const summaryRows=[
+      ["Clyde's Confections -- Accounting Export"],
+      ["Exported on", new Date().toLocaleString('en-PH')],
+      [""],
+      ["Module","Records","Notes"]
+    ];
+
+    for(const m of EXPORT_MODULES){
+      const checked=document.getElementById('exp-'+m.key)?.checked;
+      if(!checked)continue;
+      let data=await ld(m.storageKey)||[];
+      let sheetData;
+      let sheetName=m.label.slice(0,31);
+
+      if(m.key==='tb'){
+        // Trial balance: aggregate JEs into Dr/Cr per account
+        const drM={},crM={};
+        data.forEach(j=>{
+          if(j.type==='debit') drM[j.acct]=(drM[j.acct]||0)+j.amount;
+          else crM[j.acct]=(crM[j.acct]||0)+j.amount;
+        });
+        const accts=[...new Set(data.map(j=>j.acct))].sort();
+        sheetData=[['Account','Total Debits','Total Credits','Net Balance'],...accts.map(a=>{
+          const dr=+(drM[a]||0).toFixed(2),cr=+(crM[a]||0).toFixed(2);
+          return[a,dr,cr,+(dr-cr).toFixed(2)];
+        })];
+        const tDr=accts.reduce((s,a)=>s+(drM[a]||0),0);
+        const tCr=accts.reduce((s,a)=>s+(crM[a]||0),0);
+        sheetData.push(['TOTALS',+tDr.toFixed(2),+tCr.toFixed(2),+((tDr-tCr)).toFixed(2)]);
+      } else if(m.storageKey==='v2-ings'){
+        // Raw materials: main sheet + FIFO lots sheet
+        sheetData=flattenIngredients(data);
+        const lotsData=flattenFIFOLots(data);
+        const lotsWS=XLSX.utils.aoa_to_sheet(lotsData);
+        lotsWS['!cols']=Array(6).fill({wch:20});
+        XLSX.utils.book_append_sheet(wb,lotsWS,'RM - FIFO Lots');
+        summaryRows.push(['RM - FIFO Lots',lotsData.length-1,'Individual lot layers']);
+      } else if(m.storageKey==='v2-rec'){
+        sheetData=flattenRecipes(data);
+      } else {
+        sheetData=flattenForSheet(m.storageKey,data);
+      }
+
+      const ws=XLSX.utils.aoa_to_sheet(sheetData);
+      // Auto column widths
+      const colWidths=sheetData[0]?sheetData[0].map((_,ci)=>{
+        let max=String(sheetData[0][ci]||'').length;
+        sheetData.slice(1).forEach(row=>{const v=String(row[ci]||'');if(v.length>max)max=v.length;});
+        return{wch:Math.min(Math.max(max+2,8),45)};
+      }):[];
+      ws['!cols']=colWidths;
+      XLSX.utils.book_append_sheet(wb,ws,sheetName);
+      summaryRows.push([m.label,Math.max(0,sheetData.length-1),'']);
+    }
+
+    // Add summary sheet at front
+    const sumWS=XLSX.utils.aoa_to_sheet(summaryRows);
+    sumWS['!cols']=[{wch:30},{wch:15},{wch:40}];
+    XLSX.utils.book_append_sheet(wb,sumWS,'Summary');
+    // Move summary to first
+    wb.SheetNames=[wb.SheetNames.pop(),...wb.SheetNames];
+
+    // Filename with date
+    const dateStr=new Date().toISOString().slice(0,10).replace(/-/g,'');
+    XLSX.writeFile(wb,`CC_Books_Export_${dateStr}.xlsx`);
+    status.textContent='\u2713 Downloaded!';
+    btn.textContent='Download Excel';btn.disabled=false;
+    setTimeout(()=>{document.getElementById('export-modal').style.display='none';},1200);
+  }catch(e){
+    console.error(e);
+    status.textContent='Error: '+e.message;
+    btn.textContent='Download Excel';btn.disabled=false;
+  }
+}
+</script>
+
+</div><!-- /app-shell -->
+</body>
+</html>
