@@ -1098,6 +1098,24 @@ async function ld(k){
   }catch(e){ return null; }
 }
 
+async function svChunked(k, d, chunkSize){
+  // Write assembled version to localStorage
+  var serialized = JSON.stringify(d);
+  localStorage.setItem('cc_'+k, serialized);
+  // Write chunks to GS to avoid timeout
+  if(getAPIUrl()&&d.length){
+    var chunks = [];
+    for(var i=0;i<d.length;i+=chunkSize) chunks.push(d.slice(i,i+chunkSize));
+    // Write meta
+    await apiPost({action:'set',key:k+'-meta',value:JSON.stringify({count:chunks.length,total:d.length})});
+    // Write each chunk
+    for(var ci=0;ci<chunks.length;ci++){
+      await apiPost({action:'set',key:k+'-'+ci,value:JSON.stringify(chunks[ci])});
+    }
+  } else if(getAPIUrl()){
+    await apiPost({action:'set',key:k,value:serialized});
+  }
+}
 async function sv(k, d){
   // Update cache immediately
   _cache[k] = d;
@@ -1171,8 +1189,35 @@ function show(id){
 // -- DATA KEYS --
 const GI=async()=>(await ld('v2-ings'))||[];
 const GR=async()=>(await ld('v2-rec'))||[];
-const GS=async()=>(await ld('v2-sales'))||[];
-const GP=async()=>(await ld('v2-purch'))||[];
+const GS=async()=>{
+  // Try assembled key first (set by data loader)
+  var raw=localStorage.getItem('cc_v2-sales');
+  if(raw){try{return JSON.parse(raw);}catch(e){}}
+  // Try GS direct
+  var d=await ld('v2-sales');
+  if(d&&d.length)return d;
+  // Try chunks (v2-sales-0, v2-sales-1, ...)
+  var meta=await ld('v2-sales-meta');
+  if(meta&&meta.count){
+    var all=[];
+    for(var i=0;i<meta.count;i++){var c=await ld('v2-sales-'+i);if(c)all=all.concat(c);}
+    if(all.length){localStorage.setItem('cc_v2-sales',JSON.stringify(all));return all;}
+  }
+  return [];
+};
+const GP=async()=>{
+  var raw=localStorage.getItem('cc_v2-purch');
+  if(raw){try{return JSON.parse(raw);}catch(e){}}
+  var d=await ld('v2-purch');
+  if(d&&d.length)return d;
+  var meta=await ld('v2-purch-meta');
+  if(meta&&meta.count){
+    var all=[];
+    for(var i=0;i<meta.count;i++){var c=await ld('v2-purch-'+i);if(c)all=all.concat(c);}
+    if(all.length){localStorage.setItem('cc_v2-purch',JSON.stringify(all));return all;}
+  }
+  return [];
+};
 const GSU=async()=>(await ld('v2-sup'))||[];
 const GC=async()=>(await ld('v2-cash'))||[];
 const GAR=async()=>(await ld('v2-ar'))||[];
@@ -1353,7 +1398,7 @@ async function saveS(){
   if(!cu||!up||!qty){toast('Fill customer, qty, price',true);return;}
   const date=document.getElementById('s-d').value,mop=document.getElementById('s-m').value;
   const r={id:'s'+Date.now(),date,sp:document.getElementById('s-sp').value,customer:cu,cat:document.getElementById('s-ca').value,prod:document.getElementById('s-pr').value,qty,uc,tc:qty*uc,up,ts:qty*up,profit:qty*(up-uc),commRate:cr,comm:qty*up*cr/100,mop,notes:document.getElementById('s-n').value};
-  const d=await GS();d.push(r);await sv('v2-sales',d);
+  const d=await GS();d.push(r);await svChunked('v2-sales',d,100);
   // If AR, post AR entry
   if(mop.startsWith('AR -')){
     const party=mop.replace('AR - ','');
@@ -1382,7 +1427,7 @@ async function saveP(){
   if(!item||!qty||!up){toast('Fill item, qty, price',true);return;}
   const acct=document.getElementById('p-ac').value,mop=document.getElementById('p-mp').value,rcvd=document.getElementById('p-rd').value;
   const rec={id:'p'+Date.now(),ordered:document.getElementById('p-od').value,received:rcvd,store:document.getElementById('p-st').value,vendor:document.getElementById('p-ve').value,inv:document.getElementById('p-in').value,ingId,item,unit:document.getElementById('p-un').value,qty,up,total:f2(qty*up),acct,mop};
-  const purchs=await GP();purchs.push(rec);await sv('v2-purch',purchs);
+  const purchs=await GP();purchs.push(rec);await svChunked('v2-purch',purchs,80);
   if(ingId){const ings=await GI();const idx=ings.findIndex(i=>i.id===ingId);if(idx>=0){ings[idx].lots.push({date:rcvd,qty,uc:up});await sv('v2-ings',ings);}}
   const debitAcct=acct.includes('Perishables')?'Raw Materials - Perishables':acct.includes('Non Perishables')?'Raw Materials - Non Perishables':acct;
   const creditAcct=mop==='Cash'?'Cash on Hand':mop==='CIB'?'Cash in Bank':'Shopee Payable';
